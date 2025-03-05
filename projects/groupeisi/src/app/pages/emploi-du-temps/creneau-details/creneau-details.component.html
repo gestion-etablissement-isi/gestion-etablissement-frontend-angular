@@ -1,0 +1,107 @@
+<!-- Exemple pour le composant creneau-details.component.html -->
+<div 
+  class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+  (click)="onBackdropClick($event)"
+>
+  <div 
+    class="bg-white rounded-lg shadow-xl overflow-hidden w-full max-w-xl mx-4"
+    [style.border-top]="'4px solid ' + creneau?.couleur"
+  >
+    <!-- En-tête -->
+    <div class="p-4 border-b">
+      <div class="flex justify-between items-start">
+        <div>
+          <h2 class="text-2xl font-bold text-gray-800">{{ creneau?.cours?.titre }}</h2>
+          <p class="text-gray-600">{{ creneau?.cours?.matiere }}</p>
+        </div>
+        <button 
+          (click)="close.emit()" 
+          class="p-1 rounded-full hover:bg-gray-100 transition-colors"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+    </div>
+    
+    <!-- Informations sur le cours -->
+    <div class="p-4 border-b bg-gray-50">
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <p class="text-sm text-gray-500">Classe</p>
+          <p class="font-medium">{{ creneau?.cours?.classe }}</p>
+        </div>
+        <div>
+          <p class="text-sm text-gray-500">Professeur</p>
+          <p class="font-medium">{{ creneau?.cours?.professeur }}</p>
+        </div>
+        <div>
+          <p class="text-sm text-gray-500">Volume horaire</p>
+          <p class="font-medium">{{ creneau?.cours?.volumeHoraire }} heures</p>
+        </div>
+        <div>
+          <p class="text-sm text-gray-500">Coefficient</p>
+          <p class="font-medium">{{ creneau?.cours?.coefficient }}</p>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Détails des séances -->
+    <div class="p-4">
+      <h3 class="font-semibold text-lg mb-3">Détails des séances</h3>
+      
+      <div *ngIf="creneau?.descriptions?.length === 0" class="text-center py-4 text-gray-500">
+        Aucun détail disponible
+      </div>
+      
+      <div *ngFor="let description of creneau?.descriptions" class="mb-4 last:mb-0 p-3 border rounded-lg">
+        <div class="flex justify-between items-start">
+          <div>
+            <div class="flex items-center gap-2 mb-1">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span class="font-medium">{{ formatDate(description.date) }}</span>
+            </div>
+            
+            <div class="flex items-center gap-2 mb-1">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span>{{ description.heureDebut }} - {{ description.heureFin }}</span>
+            </div>
+          </div>
+          
+          <div class="text-right">
+            <div class="flex items-center gap-2 justify-end mb-1">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+              </svg>
+              <span>{{ description.salle }}</span>
+            </div>
+          </div>
+        </div>
+        
+        <p class="mt-2 text-gray-700">{{ description.description }}</p>
+      </div>
+    </div>
+    
+    <!-- Actions -->
+    <div class="p-4 border-t flex justify-end gap-2">
+      <button 
+        (click)="close.emit()" 
+        class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
+      >
+        Fermer
+      </button>
+      <button 
+        *ngIf="peutModifier()"
+        (click)="modifierCreneau()"
+        class="px-4 py-2 bg-accent text-white rounded-md hover:bg-accent-dark transition-colors"
+      >
+        Modifier
+      </button>
+    </div>
+  </div>
+</div>

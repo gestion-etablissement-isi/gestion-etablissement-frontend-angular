@@ -1,0 +1,95 @@
+/* styles.scss - À placer dans votre fichier global de styles ou dans les fichiers .scss des composants */
+
+:host {
+    --color-primary: #041F4E;
+    --color-primary-light: #0F2F61;
+    --color-primary-dark: #021535;
+    --color-secondary: #2A4C7D;
+    --color-accent: #4A77B4;
+    --color-gray-light: #F9FAFB;
+    --color-gray: #E5E7EB;
+    --color-white: #FFFFFF;
+    --color-error: #EF4444;
+    
+    display: block;
+    height: 100%;
+  }
+  
+  /* Définition des classes tailwind personnalisées */
+  .bg-primary {
+    background-color: var(--color-primary);
+  }
+  
+  .bg-primary-light {
+    background-color: var(--color-primary-light);
+  }
+  
+  .bg-primary-dark {
+    background-color: var(--color-primary-dark);
+  }
+  
+  .bg-secondary {
+    background-color: var(--color-secondary);
+  }
+  
+  .bg-accent {
+    background-color: var(--color-accent);
+  }
+  
+  .bg-gray-light {
+    background-color: var(--color-gray-light);
+  }
+  
+  .bg-gray {
+    background-color: var(--color-gray);
+  }
+  
+  .text-primary {
+    color: var(--color-primary);
+  }
+  
+  .text-primary-light {
+    color: var(--color-primary-light);
+  }
+  
+  .text-primary-dark {
+    color: var(--color-primary-dark);
+  }
+  
+  .text-secondary {
+    color: var(--color-secondary);
+  }
+  
+  .text-accent {
+    color: var(--color-accent);
+  }
+  
+  .text-error {
+    color: var(--color-error);
+  }
+  
+  .border-error {
+    border-color: var(--color-error);
+  }
+  
+  .border-gray {
+    border-color: var(--color-gray);
+  }
+  
+  .ring-accent {
+    --tw-ring-color: var(--color-accent);
+  }
+  
+  .ring-error {
+    --tw-ring-color: var(--color-error);
+  }
+  
+  /* Animation subtile pour les boutons */
+  .btn-transition {
+    transition: all 0.3s ease;
+  }
+  
+  .btn-transition:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }

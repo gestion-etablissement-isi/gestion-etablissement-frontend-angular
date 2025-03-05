@@ -1,0 +1,125 @@
+<div class="modal-backdrop" (click)="fermer()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header" [style.border-bottom-color]="'var(--color-accent)'">
+      <h2 class="text-xl font-bold text-gray-800">Ajouter un nouveau cours</h2>
+      <button (click)="fermer()" class="modal-close">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <div class="space-y-6">
+        <!-- Informations générales -->
+        <div>
+          <h3 class="section-title">Informations générales</h3>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-3">
+            <!-- Titre -->
+            <div class="form-group">
+              <label for="titre" class="form-label">Titre</label>
+              <input 
+                type="text" 
+                id="titre" 
+                [(ngModel)]="nouveauCours.titre" 
+                class="form-input" 
+                required 
+              />
+            </div>
+            
+            <!-- Volume Horaire -->
+            <div class="form-group">
+              <label for="volumeHoraire" class="form-label">Volume Horaire</label>
+              <input 
+                type="number" 
+                id="volumeHoraire" 
+                [(ngModel)]="nouveauCours.volumeHoraire" 
+                class="form-input" 
+                required 
+              />
+            </div>
+
+            <!-- Coefficient -->
+            <div class="form-group">
+              <label for="coefficient" class="form-label">Coefficient</label>
+              <input 
+                type="number" 
+                id="coefficient" 
+                [(ngModel)]="nouveauCours.coefficient" 
+                class="form-input" 
+                required 
+              />
+            </div>
+
+            <!-- Année académique -->
+            <div class="form-group">
+              <label for="anneeAcademique" class="form-label">Année académique</label>
+              <select 
+                id="anneeAcademique" 
+                [(ngModel)]="nouveauCours.anneeAcademique" 
+                class="form-select" 
+                required
+              >
+                <option value="2024-2025">2024-2025</option>
+              </select>
+            </div>
+
+            <!-- Matière -->
+            <div class="form-group">
+              <label for="matiere" class="form-label">Matière</label>
+              <select 
+                id="matiere" 
+                [(ngModel)]="nouveauCours.matiere" 
+                class="form-select" 
+                required
+              >
+                <option value="" disabled selected>Sélectionner une matière</option>
+                <option *ngFor="let matiere of matieres" [value]="matiere">{{ matiere }}</option>
+              </select>
+            </div>
+
+            <!-- Professeur -->
+            <div class="form-group">
+              <label for="professeur" class="form-label">Professeur</label>
+              <select 
+                id="professeur" 
+                [(ngModel)]="nouveauCours.professeur" 
+                class="form-select" 
+                required
+              >
+                <option value="" disabled selected>Sélectionner un professeur</option>
+                <option *ngFor="let prof of professeurs" [value]="prof.nom">{{ prof.nom }} ({{ prof.specialite }})</option>
+              </select>
+            </div>
+
+            
+
+            <!-- Classe -->
+            <div class="form-group">
+              <label for="classe" class="form-label">Classe</label>
+              <select 
+                id="classe" 
+                [(ngModel)]="nouveauCours.classe" 
+                class="form-select" 
+                required
+              >
+                <option value="" disabled selected>Sélectionner une classe</option>
+                <option *ngFor="let classe of classes" [value]="classe">{{ classe }}</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button (click)="fermer()" class="btn-secondary">Annuler</button>
+      <button (click)="soumettre()" class="btn-primary">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+        </svg>
+        Ajouter le cours
+      </button>
+    </div>
+  </div>
+</div>

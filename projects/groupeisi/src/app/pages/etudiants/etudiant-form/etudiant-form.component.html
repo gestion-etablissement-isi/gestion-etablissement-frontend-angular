@@ -1,0 +1,155 @@
+<div class="modal-backdrop" (click)="onClose()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2 class="text-xl font-bold text-gray-800">Ajouter un étudiant</h2>
+        <button (click)="onClose()" class="modal-close">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      
+      <div class="modal-body">
+        <form (ngSubmit)="onSubmit()" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Nom -->
+          <div class="form-group">
+            <label for="nom" class="form-label">Nom <span class="text-error">*</span></label>
+            <input 
+              type="text" 
+              id="nom" 
+              name="nom" 
+              [(ngModel)]="etudiant.nom" 
+              class="form-input" 
+              [ngClass]="{'input-error': formErrors['nom']}"
+            >
+            <p *ngIf="formErrors['nom']" class="error-message">{{ formErrors['nom'] }}</p>
+          </div>
+          
+          <!-- Prénom -->
+          <div class="form-group">
+            <label for="prenom" class="form-label">Prénom <span class="text-error">*</span></label>
+            <input 
+              type="text" 
+              id="prenom" 
+              name="prenom" 
+              [(ngModel)]="etudiant.prenom" 
+              class="form-input"
+              [ngClass]="{'input-error': formErrors['prenom']}"
+            >
+            <p *ngIf="formErrors['prenom']" class="error-message">{{ formErrors['prenom'] }}</p>
+          </div>
+          
+          <!-- Email -->
+          <div class="form-group">
+            <label for="email" class="form-label">Email <span class="text-error">*</span></label>
+            <input 
+              type="email" 
+              id="email" 
+              name="email" 
+              [(ngModel)]="etudiant.email" 
+              class="form-input"
+              [ngClass]="{'input-error': formErrors['email']}"
+            >
+            <p *ngIf="formErrors['email']" class="error-message">{{ formErrors['email'] }}</p>
+          </div>
+          
+          <!-- Téléphone -->
+          <div class="form-group">
+            <label for="telephone" class="form-label">Téléphone <span class="text-error">*</span></label>
+            <input 
+              type="tel" 
+              id="telephone" 
+              name="telephone" 
+              [(ngModel)]="etudiant.telephone" 
+              class="form-input"
+              [ngClass]="{'input-error': formErrors['telephone']}"
+            >
+            <p *ngIf="formErrors['telephone']" class="error-message">{{ formErrors['telephone'] }}</p>
+          </div>
+          
+          <!-- Date de naissance -->
+          <div class="form-group">
+            <label for="dateNaissance" class="form-label">Date de naissance <span class="text-error">*</span></label>
+            <input 
+              type="date" 
+              id="dateNaissance" 
+              name="dateNaissance" 
+              [(ngModel)]="etudiant.dateNaissance" 
+              class="form-input"
+              [ngClass]="{'input-error': formErrors['dateNaissance']}"
+            >
+            <p *ngIf="formErrors['dateNaissance']" class="error-message">{{ formErrors['dateNaissance'] }}</p>
+          </div>
+          
+          <!-- Classe -->
+          <div class="form-group">
+            <label for="classe" class="form-label">Classe <span class="text-error">*</span></label>
+            <select 
+              id="classe" 
+              name="classe" 
+              [(ngModel)]="etudiant.classe" 
+              class="form-input"
+              [ngClass]="{'input-error': formErrors['classe']}"
+            >
+              <option value="" disabled>Sélectionner une classe</option>
+              <option *ngFor="let classe of classes" [value]="classe">{{ classe }}</option>
+            </select>
+            <p *ngIf="formErrors['classe']" class="error-message">{{ formErrors['classe'] }}</p>
+          </div>
+          
+          <!-- Niveau -->
+          <div class="form-group">
+            <label for="niveau" class="form-label">Niveau <span class="text-error">*</span></label>
+            <select 
+              id="niveau" 
+              name="niveau" 
+              [(ngModel)]="etudiant.niveau" 
+              class="form-input"
+              [ngClass]="{'input-error': formErrors['niveau']}"
+            >
+              <option value="" disabled>Sélectionner un niveau</option>
+              <option *ngFor="let niveau of niveaux" [value]="niveau">{{ niveau }}</option>
+            </select>
+            <p *ngIf="formErrors['niveau']" class="error-message">{{ formErrors['niveau'] }}</p>
+          </div>
+          
+          <!-- Statut -->
+          <div class="form-group">
+            <label for="statut" class="form-label">Statut</label>
+            <div class="flex gap-4 mt-2">
+              <label class="inline-flex items-center">
+                <input 
+                  type="radio" 
+                  name="statut" 
+                  [value]="'Actif'" 
+                  [(ngModel)]="etudiant.statut" 
+                  class="form-radio"
+                >
+                <span class="ml-2">Actif</span>
+              </label>
+              <label class="inline-flex items-center">
+                <input 
+                  type="radio" 
+                  name="statut" 
+                  [value]="'Inactif'" 
+                  [(ngModel)]="etudiant.statut" 
+                  class="form-radio"
+                >
+                <span class="ml-2">Inactif</span>
+              </label>
+            </div>
+          </div>
+        </form>
+      </div>
+      
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" (click)="onClose()">Annuler</button>
+        <button type="button" class="btn-primary" (click)="onSubmit()">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+          </svg>
+          Enregistrer
+        </button>
+      </div>
+    </div>
+  </div>

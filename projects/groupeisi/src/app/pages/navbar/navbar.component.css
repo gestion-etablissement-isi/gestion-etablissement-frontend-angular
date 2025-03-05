@@ -1,0 +1,38 @@
+.navbar-container {
+  background-color: var(--color-white);
+  border-bottom: 1px solid var(--color-gray);
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  width: 100%;
+}
+
+.notification-btn {
+  position: relative;
+}
+
+.notification-badge {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 8px;
+  width: 8px;
+  background-color: var(--color-error);
+  border-radius: 50%;
+  border: 2px solid var(--color-white);
+}
+
+.user-avatar img {
+  object-fit: cover;
+}
+
+.logout-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+@media (max-width: 768px) {
+  .logout-btn {
+    padding: 0.5rem;
+  }
+}

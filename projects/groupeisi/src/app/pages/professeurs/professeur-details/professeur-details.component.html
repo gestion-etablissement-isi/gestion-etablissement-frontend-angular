@@ -1,0 +1,79 @@
+<div class="modal-backdrop" (click)="onClose()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2 class="text-xl font-bold text-gray-800">Détails de l'étudiant</h2>
+        <button (click)="onClose()" class="modal-close">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+  
+      <div class="modal-body">
+        <div class="flex flex-col sm:flex-row gap-6">
+          <!-- Avatar et informations principales -->
+          <div class="flex flex-col items-center">
+            <div class="avatar-large bg-accent text-white rounded-full flex items-center justify-center text-2xl font-bold mb-3">
+              {{ professeur()?.prenom?.charAt(0) }}{{ professeur()?.nom?.charAt(0) }}
+            </div>
+            <h3 class="text-lg font-semibold text-center">
+              {{ professeur()?.prenom }} {{ professeur()?.nom }}
+            </h3>
+            <p class="text-sm text-gray-500 text-center">ID: {{ professeur()?.id }}</p>
+            <div class="mt-3">
+              <span
+                class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full"
+                [ngClass]="professeur()?.statut === 'Actif' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
+              >
+                {{ professeur()?.statut }}
+              </span>
+            </div>
+          </div>
+  
+          <!-- Informations détaillées -->
+          <div class="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="info-group">
+              <h4 class="info-label">Email</h4>
+              <p class="info-value">{{ professeur()?.email }}</p>
+            </div>
+  
+            <div class="info-group">
+              <h4 class="info-label">Téléphone</h4>
+              <p class="info-value">{{ professeur()?.telephone }}</p>
+            </div>
+  
+            <div class="info-group">
+              <h4 class="info-label">Date de naissance</h4>
+              <p class="info-value">{{ formatDate(professeur()?.dateNaissance) }}</p>
+            </div>
+  
+            <div class="info-group">
+              <h4 class="info-label">Classe</h4>
+              <p class="info-value">{{ professeur()?.classe }}</p>
+            </div>
+  
+            <div class="info-group">
+              <h4 class="info-label">Niveau</h4>
+              <p class="info-value">{{ professeur()?.niveau }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+  
+      <div class="modal-footer">
+        <button class="btn-secondary" (click)="onClose()">Fermer</button>
+        <button class="btn-primary">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+            />
+          </svg>
+          Modifier
+        </button>
+      </div>
+    </div>
+  </div>
+  

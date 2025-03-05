@@ -1,0 +1,102 @@
+<div class="p-8 bg-gray-light min-h-screen">
+    <h1 class="text-3xl font-bold text-primary mb-8">Tableau de Bord</h1>
+  
+    <!-- Statistiques -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <!-- Étudiants -->
+      <div class="bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200">
+        <div class="flex items-center gap-3 mb-4">
+          <svg class="w-8 h-8 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+          </svg>
+          <h2 class="text-xl font-semibold text-primary">Étudiants</h2>
+        </div>
+        <p class="text-gray-700">Total: {{ statsEtudiants.total }}</p>
+        <p class="text-green-600">Actifs: {{ statsEtudiants.actifs }}</p>
+        <p class="text-red-600">Inactifs: {{ statsEtudiants.inactifs }}</p>
+      </div>
+  
+      <!-- Classes -->
+      <div class="bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200">
+        <div class="flex items-center gap-3 mb-4">
+          <svg class="w-8 h-8 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+          </svg>
+          <h2 class="text-xl font-semibold text-primary">Classes</h2>
+        </div>
+        <p class="text-gray-700">Total: {{ statsClasses.total }}</p>
+        <p class="text-green-600">Pleines: {{ statsClasses.pleines }}</p>
+        <p class="text-blue-600">Disponibles: {{ statsClasses.disponibles }}</p>
+      </div>
+  
+      <!-- Professeurs -->
+      <div class="bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200">
+        <div class="flex items-center gap-3 mb-4">
+          <svg class="w-8 h-8 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+          </svg>
+          <h2 class="text-xl font-semibold text-primary">Professeurs</h2>
+        </div>
+        <p class="text-gray-700">Total: {{ statsProfesseurs.total }}</p>
+        <p class="text-green-600">Actifs: {{ statsProfesseurs.actifs }}</p>
+        <p class="text-red-600">Inactifs: {{ statsProfesseurs.inactifs }}</p>
+      </div>
+  
+      <!-- Cours -->
+      <div class="bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200">
+        <div class="flex items-center gap-3 mb-4">
+          <svg class="w-8 h-8 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+          </svg>
+          <h2 class="text-xl font-semibold text-primary">Cours</h2>
+        </div>
+        <p class="text-gray-700">Total: {{ statsCours.total }}</p>
+        <p class="text-green-600">Actifs: {{ statsCours.actifs }}</p>
+        <p class="text-red-600">Inactifs: {{ statsCours.inactifs }}</p>
+      </div>
+    </div>
+  
+    <!-- Étudiants récents -->
+    <div class="bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 mb-8">
+      <h2 class="text-xl font-semibold text-primary mb-4">Étudiants récents</h2>
+      <div class="overflow-x-auto">
+        <table class="min-w-full bg-white">
+          <thead>
+            <tr class="bg-gray-50">
+              <th class="py-3 px-4 border-b text-left text-sm font-semibold text-gray-600">Nom</th>
+              <th class="py-3 px-4 border-b text-left text-sm font-semibold text-gray-600">Prénom</th>
+              <th class="py-3 px-4 border-b text-left text-sm font-semibold text-gray-600">Classe</th>
+              <th class="py-3 px-4 border-b text-left text-sm font-semibold text-gray-600">Statut</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let etudiant of etudiantsRecents" class="hover:bg-gray-50 transition-colors duration-200">
+              <td class="py-3 px-4 border-b text-sm text-gray-700">{{ etudiant.nom }}</td>
+              <td class="py-3 px-4 border-b text-sm text-gray-700">{{ etudiant.prenom }}</td>
+              <td class="py-3 px-4 border-b text-sm text-gray-700">{{ etudiant.classe }}</td>
+              <td class="py-3 px-4 border-b">
+                <span [ngClass]="{'text-green-600': etudiant.statut === 'Actif', 'text-red-600': etudiant.statut === 'Inactif'}" class="text-sm font-medium">
+                  {{ etudiant.statut }}
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  
+    <!-- Cours à venir -->
+    <div class="bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 mb-8">
+      <h2 class="text-xl font-semibold text-primary mb-4">Cours à venir</h2>
+      <div class="space-y-4">
+        <div *ngFor="let creneau of coursProchains" class="p-4 border rounded-lg hover:shadow-md transition-shadow duration-200">
+          <h3 class="text-lg font-semibold text-primary">{{ creneau.cours.titre }}</h3>
+          <p class="text-gray-600">{{ creneau.cours.professeur }} - {{ creneau.cours.classe }}</p>
+          <div *ngFor="let desc of creneau.descriptions" class="mt-2">
+            <p class="text-sm text-gray-500">{{ desc.date }} | {{ desc.heureDebut }} - {{ desc.heureFin }}</p>
+            <p class="text-sm text-gray-500">{{ desc.salle }} - {{ desc.description }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>

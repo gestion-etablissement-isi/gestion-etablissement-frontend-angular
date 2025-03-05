@@ -1,0 +1,62 @@
+/* Styles pour les boutons */
+.btn-primary {
+    background-color: var(--color-primary);
+    transition: all 0.2s ease;
+  }
+  
+  .btn-primary:hover {
+    background-color: var(--color-primary-dark);
+  }
+  
+  /* Animation pour les lignes du tableau */
+  tbody tr {
+    transition: all 0.2s ease;
+  }
+  
+  /* Styles pour les modals */
+  app-professeur-details, app-professeur-form {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    min-height: 100%;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0.5);
+  }
+
+  /* Pour s'assurer que l'élément prend tout l'espace disponible */
+.space-y-6 {
+    display: flex;
+    flex-direction: column;
+    height: 100%; /* Remplir l'espace du parent */
+  }
+  
+  .w-full {
+    width: 100%;
+  }
+  
+  /* Ajout d'une règle pour que les modals prennent bien la taille de l'écran */
+  app-professeur-details, app-professeur-form {
+    max-width: 100%;
+    max-height: 100%;
+    overflow: auto;
+  }
+  
+  /* Un ajustement pour les petits écrans, par exemple, pour que les modals ne sortent pas de l'écran */
+  @media (max-width: 640px) {
+    app-professeur-details, app-professeur-form {
+      width: auto;
+      height: auto;
+    }
+  }
+  
+  
+  /* Responsive pour les petits écrans */
+  @media (max-width: 640px) {
+    .overflow-x-auto {
+      margin: 0 -1rem;
+    }
+  }

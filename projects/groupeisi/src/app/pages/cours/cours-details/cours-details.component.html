@@ -1,0 +1,68 @@
+<div class="modal-backdrop" (click)="onClose()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header" [style.border-bottom-color]="cours.couleur">
+        <h2 class="text-xl font-bold text-gray-800">Détails du cours</h2>
+        <button (click)="onClose()" class="modal-close">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      
+      <div class="modal-body">
+        <div class="flex flex-col sm:flex-row gap-6">
+          <!-- Informations principales -->
+          <div class="flex-1">
+            <div class="mb-6">
+              <h3 class="text-2xl font-bold text-gray-800" [style.color]="cours.couleur">{{ cours.titre }}</h3>
+              <p class="text-gray-600 mt-1">{{ cours.description }}</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="info-group">
+                <h4 class="info-label">Matière</h4>
+                <p class="info-value">{{ cours.matiere }}</p>
+              </div>
+              
+              <div class="info-group">
+                <h4 class="info-label">Professeur</h4>
+                <p class="info-value">{{ cours.professeur }}</p>
+              </div>
+              
+              <div class="info-group">
+                <h4 class="info-label">Classe</h4>
+                <p class="info-value">{{ cours.classe }}</p>
+              </div>
+              
+              
+              
+              <div class="info-group">
+                <h4 class="info-label">Volume Horaire</h4>
+                <p class="info-value">{{ cours.volumeHoraire }}</p>
+              </div>
+              
+              <div class="info-group">
+                <h4 class="info-label">Coefficient</h4>
+                <p class="info-value">{{ cours.coefficient }}</p>
+              </div>
+
+              <div class="info-group">
+                <h4 class="info-label">Annee académique</h4>
+                <p class="info-value">{{ cours.anneeAcademique }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="modal-footer">
+        <button class="btn-secondary" (click)="onClose()">Fermer</button>
+        <button class="btn-primary">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+          </svg>
+          Modifier
+        </button>
+      </div>
+    </div>
+  </div>

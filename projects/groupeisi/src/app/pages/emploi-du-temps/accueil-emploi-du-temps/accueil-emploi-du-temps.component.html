@@ -1,0 +1,225 @@
+<div class="space-y-6">
+  <!-- En-tête avec titre et contrôles -->
+  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-800">Emploi du Temps</h1>
+      <p class="text-gray-600">Consultez et gérez les emplois du temps des classes.</p>
+    </div>
+    <!-- Bouton Ajouter un creneau -->
+    <button (click)="ouvrirModalAjouterCreneau()"
+      class="px-4 py-2 bg-accent text-white rounded-md hover:bg-accent-dark transition-colors">
+      <span class="flex items-center">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24"
+          stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+        </svg>
+        Ajouter un créneau
+      </span>
+    </button>
+
+  </div>
+  <div class="flex items-center gap-2">
+    <button (click)="allerAujourdhui()"
+      class="px-3 py-1.5 bg-white border border-gray-300 rounded-md text-sm hover:bg-gray-50 transition-colors">
+      Aujourd'hui
+    </button>
+    <div class="flex items-center gap-1">
+      <button (click)="changerMois(-1)" class="p-1.5 rounded-md hover:bg-gray-100 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        </svg>
+      </button>
+      <span class="text-lg font-medium">{{ formatMonth(moisActuel) }}</span>
+      <button (click)="changerMois(1)" class="p-1.5 rounded-md hover:bg-gray-100 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+
+  <!-- Filtres et vues -->
+  <div class="bg-white rounded-lg shadow-sm p-4">
+    <div class="flex justify-between mb-2">
+      <button (click)="resetFilters()"
+        class="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors">
+        Réinitialiser les filtres
+      </button>
+
+
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <!-- Filtres -->
+      <div>
+        <label for="classe" class="block text-sm font-medium text-gray-700 mb-1">Classe</label>
+        <select id="classe" [(ngModel)]="filtreClasse" (change)="applyFilters()"
+          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent">
+          <option value="">Toutes les classes</option>
+          <option *ngFor="let classe of classes" [value]="classe">{{ classe }}</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="professeur" class="block text-sm font-medium text-gray-700 mb-1">Professeur</label>
+        <select id="professeur" [(ngModel)]="filtreProfesseur" (change)="applyFilters()"
+          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent">
+          <option value="">Tous les professeurs</option>
+          <option *ngFor="let professeur of professeurs" [value]="professeur">{{ professeur }}</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="matiere" class="block text-sm font-medium text-gray-700 mb-1">Matière</label>
+        <select id="matiere" [(ngModel)]="filtreMatiere" (change)="applyFilters()"
+          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent">
+          <option value="">Toutes les matières</option>
+          <option *ngFor="let matiere of matieres" [value]="matiere">{{ matiere }}</option>
+        </select>
+      </div>
+
+      <div class="flex flex-col justify-end ">
+
+
+        <!-- Sélecteur de vue -->
+        <div class="inline-flex rounded-md shadow-sm">
+          <button (click)="changerVue('jour')" [class.bg-accent]="vueCalendrier === 'jour'"
+            [class.text-white]="vueCalendrier === 'jour'" [class.bg-white]="vueCalendrier !== 'jour'"
+            class="px-4 py-2 text-sm font-medium border border-gray-300 rounded-l-md hover:bg-gray-50 transition-colors">
+            Jour
+          </button>
+          <button (click)="changerVue('semaine')" [class.bg-accent]="vueCalendrier === 'semaine'"
+            [class.text-white]="vueCalendrier === 'semaine'" [class.bg-white]="vueCalendrier !== 'semaine'"
+            class="px-4 py-2 text-sm font-medium border-t border-b border-gray-300 hover:bg-gray-50 transition-colors">
+            Semaine
+          </button>
+          <button (click)="changerVue('mois')" [class.bg-accent]="vueCalendrier === 'mois'"
+            [class.text-white]="vueCalendrier === 'mois'" [class.bg-white]="vueCalendrier !== 'mois'"
+            class="px-4 py-2 text-sm font-medium border border-gray-300 rounded-r-md hover:bg-gray-50 transition-colors">
+            Mois
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Calendrier -->
+  <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+    <!-- En-tête des jours de la semaine (pour vue mois et semaine) -->
+    <div *ngIf="vueCalendrier !== 'jour'" class="grid grid-cols-7 border-b">
+      <div *ngFor="let jour of joursSemaine" class="py-2 text-center text-sm font-medium text-gray-500">
+        {{ jour }}
+      </div>
+    </div>
+
+    <!-- Vue Mois -->
+    <div *ngIf="vueCalendrier === 'mois'" class="grid grid-cols-7 min-h-[600px]">
+      <div *ngFor="let jour of joursDuCalendrier" class="border-r last:border-r-0 border-b p-2 h-full"
+        [class.bg-gray-50]="!jour.estMoisActuel" [class.bg-accent-light]="jour.estJourActuel">
+        <div class="flex justify-between items-center mb-2">
+          <p class="inline-flex items-center justify-center w-7 h-7 rounded-full text-sm font-medium"
+            [class.bg-accent]="jour.estJourActuel" [class.text-white]="jour.estJourActuel"
+            [class.text-gray-400]="!jour.estMoisActuel && !jour.estJourActuel">
+            {{ formatDate(jour.date) }}
+          </p>
+          <span *ngIf="jour.creneau.length > 0" class="text-xs font-medium text-accent">
+            {{ jour.creneau.length }} créneau{{ jour.creneau.length > 1 ? 'x' : '' }}
+          </span>
+        </div>
+
+        <div class="space-y-1 max-h-[100px] overflow-y-auto event-container">
+          <div *ngFor="let creneau of jour.creneau"
+            class="p-1 rounded text-xs cursor-pointer transition-all hover:shadow-sm event-card"
+            [style.background-color]="creneau.couleur + '20'" [style.border-left]="'2px solid ' + creneau.couleur"
+            (click)="showCreneauDetails(creneau)">
+            <p class="font-medium truncate">{{ creneau.cours.titre }}</p>
+            <div *ngFor="let description of creneau.descriptions">
+              <p class="text-gray-600 truncate">{{ description.heureDebut }} - {{ description.heureFin }}</p>
+              <p class="text-gray-600 truncate">{{ description.salle }} | {{ description.description }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Vue Semaine -->
+    <div *ngIf="vueCalendrier === 'semaine'" class="grid grid-cols-7 min-h-[600px]">
+      <div *ngFor="let jour of joursDuCalendrier" class="border-r last:border-r-0 border-b p-2 h-full"
+        [class.bg-accent-light]="jour.estJourActuel">
+        <div class="text-center mb-2">
+          <p class="inline-flex items-center justify-center w-8 h-8 rounded-full text-sm font-medium"
+            [class.bg-accent]="jour.estJourActuel" [class.text-white]="jour.estJourActuel">
+            {{ formatDate(jour.date) }}
+          </p>
+        </div>
+
+        <div class="space-y-2">
+          <div *ngFor="let creneau of jour.creneau"
+            class="p-2 rounded text-sm cursor-pointer transition-all hover:shadow-md"
+            [style.background-color]="creneau.couleur + '20'" [style.border-left]="'3px solid ' + creneau.couleur"
+            (click)="showCreneauDetails(creneau)">
+            <p class="font-medium truncate">{{ creneau.cours.titre }}</p>
+            <div *ngFor="let description of creneau.descriptions">
+              <p class="text-xs text-gray-600">{{ description.heureDebut }} - {{ description.heureFin }}</p>
+              <p class="text-xs text-gray-600">{{ description.salle }}</p>
+              <p class="text-xs text-gray-500 truncate">{{ description.description }}</p>
+            </div>
+            <p class="text-xs text-gray-500 truncate mt-1">{{ creneau.cours.matiere }} | {{ creneau.cours.professeur }}
+            </p>
+          </div>
+
+          <div *ngIf="jour.creneau.length === 0" class="text-center py-4 text-xs text-gray-400">
+            Aucun créneau
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Vue Jour -->
+    <div *ngIf="vueCalendrier === 'jour'" class="p-4">
+      <div *ngFor="let jour of joursDuCalendrier" class="mb-4">
+        <h2 class="text-xl font-bold text-gray-800 mb-3">{{ formatFullDate(jour.date) }}</h2>
+
+        <div *ngIf="jour.creneau.length === 0" class="text-center py-8 text-gray-500">
+          Aucun créneau programmé pour cette journée
+        </div>
+
+        <div *ngIf="jour.creneau.length > 0" class="space-y-3">
+          <div *ngFor="let creneau of jour.creneau" class="p-3 rounded-lg cursor-pointer transition-all hover:shadow-md"
+            [style.background-color]="creneau.couleur + '20'" [style.border-left]="'4px solid ' + creneau.couleur"
+            (click)="showCreneauDetails(creneau)">
+            <div class="flex justify-between items-start">
+              <div>
+                <h3 class="font-semibold text-gray-800">{{ creneau.cours.titre }}</h3>
+                <p class="text-xs text-gray-500">{{ creneau.cours.matiere }}</p>
+              </div>
+
+              <div class="text-right">
+                <p class="text-sm font-medium">{{ creneau.cours.classe }}</p>
+                <p class="text-xs text-gray-500">{{ creneau.cours.professeur }}</p>
+              </div>
+            </div>
+
+            <div class="mt-2 bg-white bg-opacity-60 rounded p-2">
+              <div *ngFor="let description of creneau.descriptions" class="mb-2 last:mb-0">
+                <div class="flex justify-between">
+                  <span class="font-medium">{{ description.heureDebut }} - {{ description.heureFin }}</span>
+                  <span class="text-sm">{{ description.salle }}</span>
+                </div>
+                <p class="text-sm mt-1">{{ description.description }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de détails du creneau -->
+<app-creneau-details *ngIf="showDetails && selectedCreneau" [creneau]="selectedCreneau"
+  (close)="closeDetails()"></app-creneau-details>
+
+<!-- Modal d'ajout de creneau -->
+<app-ajouter-creneau *ngIf="showAjouterCreneau" (close)="fermerModalAjouterCreneau()"
+  (creneauAjoute)="ajouterCreneau($event)"></app-ajouter-creneau>

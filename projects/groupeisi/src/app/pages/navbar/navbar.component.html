@@ -1,0 +1,27 @@
+<div class="navbar-container">
+    <div class="flex items-center justify-between w-full px-6 py-3">
+      <div class="flex-1">
+        <h1 class="text-xl font-semibold text-gray-800">Groupe ISI</h1>
+      </div>
+      
+      <div class="flex items-center gap-4">
+        
+        
+        <div class="flex items-center gap-3">
+          <div class="user-avatar">
+            <img [src]="user.avatar" alt="User avatar" class="h-10 w-10 rounded-full border-2 border-accent">
+          </div>
+          <div class="user-info hidden md:block">
+            <p class="text-sm font-medium text-gray-800">{{ user.firstName }} {{ user.lastName }}</p>
+            <p class="text-xs text-gray-500">Administrateur</p>
+          </div>
+          <button (click)="logout()" class="logout-btn px-3 py-1.5 bg-primary text-white text-sm rounded-md hover:bg-primary-dark transition-colors">
+            <span class="hidden md:inline">Déconnecter</span>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 md:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
