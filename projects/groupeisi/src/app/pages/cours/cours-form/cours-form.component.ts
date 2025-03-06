@@ -1,6 +1,10 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { IMatiere } from '../../../interfaces/matiere.interface';
+import { IProfesseur } from '../../../interfaces/professeur.interface';
+import { IClasse } from '../../../interfaces/classe.interface';
+import { ICours } from '../../../interfaces/cours.interface';
 
 interface Cours {
   id: number;
@@ -17,29 +21,25 @@ interface Cours {
 
 
 @Component({
-  selector: 'app-cours-form',
-  standalone: true,
-  imports: [CommonModule, FormsModule],
-  templateUrl: './cours-form.component.html',
-  styleUrl: './cours-form.component.css'
+    selector: 'app-cours-form',
+    imports: [CommonModule, FormsModule],
+    templateUrl: './cours-form.component.html',
+    styleUrl: './cours-form.component.css'
 })
 export class CoursFormComponent {
   @Output() close = new EventEmitter<void>();
-  @Output() coursAjoute = new EventEmitter<Cours>();
+  @Output() coursAjoute = new EventEmitter<ICours>();
+  @Output() getProfesseur = new EventEmitter<string>();
+  @Output() getClasse = new EventEmitter<string>();
+  @Output() getMatiere = new EventEmitter<string>();
+  @Input() matieres: IMatiere[] = [];
+  @Input() professeurs: IProfesseur[] = [];
+  @Input() classes: IClasse[] = [];
 
-  // Données pour les sélecteurs
-  matieres: string[] = ['Mathématiques', 'Physique-Chimie', 'Français', 'Histoire-Géographie', 'SVT', 'Anglais', 'Philosophie'];
-  professeurs: { nom: string, specialite: string }[] = [
-    { nom: 'Martin Dubois', specialite: 'Mathématiques' },
-    { nom: 'Sophie Moreau', specialite: 'Physique-Chimie' },
-    { nom: 'Philippe Lambert', specialite: 'Anglais' },
-    { nom: 'Claire Fontaine', specialite: 'Français' },
-    { nom: 'Thomas Petit', specialite: 'Histoire-Géographie' },
-    { nom: 'Marie Leroy', specialite: 'SVT' }
-  ];
   
-  classes: string[] = ['Terminale S', 'Terminale L', 'Première S', 'Première L', 'Seconde A', 'Seconde B'];
   joursSemaine: string[] = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
+
+  
 
   // Données du formulaire
   nouveauCours = {

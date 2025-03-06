@@ -1,19 +1,19 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { IMatiere } from '../../../interfaces/matiere.interface';
 
 @Component({
-  selector: 'app-matiere-form',
-  standalone: true,
-  imports: [CommonModule, FormsModule],
-  templateUrl: './matiere-form.component.html',
-  styleUrl: './matiere-form.component.css'
+    selector: 'app-matiere-form',
+    imports: [CommonModule, FormsModule],
+    templateUrl: './matiere-form.component.html',
+    styleUrl: './matiere-form.component.css'
 })
 export class MatiereFormComponent {
   @Output() close = new EventEmitter<void>();
   @Output() save = new EventEmitter<any>();
 
-  matiere = {
+  matiere: IMatiere = {
     libelle: '',
     statut: 'Actif' as 'Actif' | 'Inactif'
   };

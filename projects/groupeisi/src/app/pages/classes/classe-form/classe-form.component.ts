@@ -5,11 +5,10 @@ import { ClasseService } from '../../../services/classe.service';
 import { IClasse } from '../../../interfaces/classe.interface';
 
 @Component({
-  selector: 'app-classe-form',
-  standalone: true,
-  imports: [CommonModule, FormsModule],
-  templateUrl: './classe-form.component.html',
-  styleUrls: ['./classe-form.component.css']
+    selector: 'app-classe-form',
+    imports: [CommonModule, FormsModule],
+    templateUrl: './classe-form.component.html',
+    styleUrls: ['./classe-form.component.css']
 })
 export class ClasseFormComponent {
   @Input() anneesScolaires: string[] = [];

@@ -30,11 +30,10 @@ interface CreneauDescription {
 }
 
 @Component({
-  selector: 'app-ajouter-creneau',
-  standalone: true,
-  imports: [CommonModule, FormsModule],
-  templateUrl: './ajouter-creneau.component.html',
-  styleUrl: './ajouter-creneau.component.css'
+    selector: 'app-ajouter-creneau',
+    imports: [CommonModule, FormsModule],
+    templateUrl: './ajouter-creneau.component.html',
+    styleUrl: './ajouter-creneau.component.css'
 })
 export class AjouterCreneauComponent {
   @Output() close = new EventEmitter<void>();

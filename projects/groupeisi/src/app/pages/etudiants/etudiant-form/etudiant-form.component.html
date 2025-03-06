@@ -60,29 +60,17 @@
               type="tel" 
               id="telephone" 
               name="telephone" 
-              [(ngModel)]="etudiant.telephone" 
+              [(ngModel)]="etudiant.tel" 
               class="form-input"
               [ngClass]="{'input-error': formErrors['telephone']}"
             >
             <p *ngIf="formErrors['telephone']" class="error-message">{{ formErrors['telephone'] }}</p>
           </div>
           
-          <!-- Date de naissance -->
-          <div class="form-group">
-            <label for="dateNaissance" class="form-label">Date de naissance <span class="text-error">*</span></label>
-            <input 
-              type="date" 
-              id="dateNaissance" 
-              name="dateNaissance" 
-              [(ngModel)]="etudiant.dateNaissance" 
-              class="form-input"
-              [ngClass]="{'input-error': formErrors['dateNaissance']}"
-            >
-            <p *ngIf="formErrors['dateNaissance']" class="error-message">{{ formErrors['dateNaissance'] }}</p>
-          </div>
+          
           
           <!-- Classe -->
-          <div class="form-group">
+          <!-- <div class="form-group">
             <label for="classe" class="form-label">Classe <span class="text-error">*</span></label>
             <select 
               id="classe" 
@@ -95,23 +83,9 @@
               <option *ngFor="let classe of classes" [value]="classe">{{ classe }}</option>
             </select>
             <p *ngIf="formErrors['classe']" class="error-message">{{ formErrors['classe'] }}</p>
-          </div>
+          </div> -->
           
-          <!-- Niveau -->
-          <div class="form-group">
-            <label for="niveau" class="form-label">Niveau <span class="text-error">*</span></label>
-            <select 
-              id="niveau" 
-              name="niveau" 
-              [(ngModel)]="etudiant.niveau" 
-              class="form-input"
-              [ngClass]="{'input-error': formErrors['niveau']}"
-            >
-              <option value="" disabled>Sélectionner un niveau</option>
-              <option *ngFor="let niveau of niveaux" [value]="niveau">{{ niveau }}</option>
-            </select>
-            <p *ngIf="formErrors['niveau']" class="error-message">{{ formErrors['niveau'] }}</p>
-          </div>
+          
           
           <!-- Statut -->
           <div class="form-group">

@@ -3,110 +3,51 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { EtudiantDetailsComponent } from '../etudiant-details/etudiant-details.component';
 import { EtudiantFormComponent } from '../etudiant-form/etudiant-form.component';
+import { IEtudiant } from '../../../interfaces/etudiant.interface';
+import { EtudiantService } from '../../../services/etudiant/etudiant.service';
 
-interface Etudiant {
-  id: number;
-  nom: string;
-  prenom: string;
-  email: string;
-  telephone: string;
-  dateNaissance: string;
-  classe: string;
-  niveau: string;
-  statut: 'Actif' | 'Inactif';
-}
+
 
 @Component({
-  selector: 'app-accueil-etudiant',
-  standalone: true,
-  imports: [CommonModule, FormsModule, EtudiantDetailsComponent, EtudiantFormComponent],
-  templateUrl: './accueil-etudiant.component.html',
-  styleUrl: './accueil-etudiant.component.css'
+    selector: 'app-accueil-etudiant',
+    imports: [CommonModule, FormsModule, EtudiantDetailsComponent, EtudiantFormComponent],
+    templateUrl: './accueil-etudiant.component.html',
+    styleUrl: './accueil-etudiant.component.css'
 })
 export class AccueilEtudiantComponent implements OnInit {
-  etudiants: Etudiant[] = [];
-  filteredEtudiants: Etudiant[] = [];
+  etudiants: IEtudiant[] = [];
+  filteredEtudiants: IEtudiant[] = [];
+  selectedEtudiant: IEtudiant | null = null;
+  etudiant: IEtudiant = {nom: '', prenom: '', email: '', tel: '', statut: ''};
   searchTerm: string = '';
-  selectedEtudiant: Etudiant | null = null;
   showAddForm: boolean = false;
   showDetails: boolean = false;
   
   // Filtres
   filtreClasse: string = '';
-  filtreNiveau: string = '';
   filtreStatut: string = '';
   
-  // Options pour les filtres
-  classes: string[] = ['Terminale S', 'Terminale L', 'Première S', 'Première L', 'Seconde'];
-  niveaux: string[] = ['Lycée', 'Collège', 'Primaire'];
+  
   statuts: string[] = ['Actif', 'Inactif'];
 
   ngOnInit() {
     // Simuler le chargement des données depuis une API
-    this.loadEtudiants();
+    this.getEtudiants();
   }
 
-  loadEtudiants() {
-    // Données fictives pour la démonstration
-    this.etudiants = [
-      {
-        id: 1,
-        nom: 'Dupont',
-        prenom: 'Marie',
-        email: 'marie.dupont@example.com',
-        telephone: '06 12 34 56 78',
-        dateNaissance: '2005-05-15',
-        classe: 'Terminale S',
-        niveau: 'Lycée',
-        statut: 'Actif'
+  constructor(
+    private etudiantService: EtudiantService
+  ) {}
+
+  getEtudiants(): void {
+    this.etudiantService.getAllEtudiants().subscribe(
+      (data) => {
+        this.etudiants = data;
       },
-      {
-        id: 2,
-        nom: 'Martin',
-        prenom: 'Lucas',
-        email: 'lucas.martin@example.com',
-        telephone: '06 23 45 67 89',
-        dateNaissance: '2006-08-22',
-        classe: 'Première S',
-        niveau: 'Lycée',
-        statut: 'Actif'
-      },
-      {
-        id: 3,
-        nom: 'Bernard',
-        prenom: 'Emma',
-        email: 'emma.bernard@example.com',
-        telephone: '06 34 56 78 90',
-        dateNaissance: '2007-03-10',
-        classe: 'Seconde',
-        niveau: 'Lycée',
-        statut: 'Actif'
-      },
-      {
-        id: 4,
-        nom: 'Petit',
-        prenom: 'Thomas',
-        email: 'thomas.petit@example.com',
-        telephone: '06 45 67 89 01',
-        dateNaissance: '2006-11-30',
-        classe: 'Première L',
-        niveau: 'Lycée',
-        statut: 'Inactif'
-      },
-      {
-        id: 5,
-        nom: 'Robert',
-        prenom: 'Léa',
-        email: 'lea.robert@example.com',
-        telephone: '06 56 78 90 12',
-        dateNaissance: '2005-07-18',
-        classe: 'Terminale L',
-        niveau: 'Lycée',
-        statut: 'Actif'
+      (error) => {
+        console.error('Erreur lors de la récupération des etudiants', error);
       }
-    ];
-    
-    this.applyFilters();
+    );
   }
 
   applyFilters() {
@@ -118,13 +59,13 @@ export class AccueilEtudiantComponent implements OnInit {
         etudiant.email.toLowerCase().includes(this.searchTerm.toLowerCase());
       
       // Filtres par catégorie
-      const classeMatch = !this.filtreClasse || etudiant.classe === this.filtreClasse;
-      const niveauMatch = !this.filtreNiveau || etudiant.niveau === this.filtreNiveau;
       const statutMatch = !this.filtreStatut || etudiant.statut === this.filtreStatut;
       
-      return searchMatch && classeMatch && niveauMatch && statutMatch;
+      return searchMatch && statutMatch;
     });
   }
+
+
 
   onSearch() {
     this.applyFilters();
@@ -133,12 +74,11 @@ export class AccueilEtudiantComponent implements OnInit {
   resetFilters() {
     this.searchTerm = '';
     this.filtreClasse = '';
-    this.filtreNiveau = '';
     this.filtreStatut = '';
     this.applyFilters();
   }
 
-  showEtudiantDetails(etudiant: Etudiant) {
+  showEtudiantDetails(etudiant: IEtudiant) {
     this.selectedEtudiant = etudiant;
     this.showDetails = true;
     this.showAddForm = false;
@@ -159,13 +99,62 @@ export class AccueilEtudiantComponent implements OnInit {
     this.showAddForm = false;
   }
 
-  addEtudiant(etudiant: Etudiant) {
-    // Simuler l'ajout d'un étudiant avec un nouvel ID
-    const newId = Math.max(...this.etudiants.map(e => e.id)) + 1;
-    const newEtudiant = { ...etudiant, id: newId };
-    
-    this.etudiants.push(newEtudiant);
-    this.applyFilters();
-    this.closeAddForm();
+  ajouterEtudiant(): void {
+    this.etudiantService.ajouterEtudiant(this.etudiant).subscribe(
+      (data) => {
+        this.etudiants.push(data);
+        console.log('Etudiant ajoutée avec succès', data);
+      },
+      (error) => {
+        console.error("Erreur lors de l'ajout de l'etudiant", error);
+      }
+    );
+  }
+
+  // Méthode pour supprimer un etudiant
+  supprimerEtudiant(id: string): void {
+    if (
+      confirm(`Êtes-vous sûr de vouloir supprimer l'etudiant'  ?`)
+    ) {
+      this.etudiantService.supprimerEtudiant(id).subscribe(
+        () => {
+          this.etudiants = this.etudiants.filter((etudiant) => etudiant.id !== id); 
+          console.log('Etudiant supprimée avec succès');
+        },
+        (error) => {
+          console.error('Erreur lors de la suppression du etudiant', error);
+        }
+      );
+    }
+  }
+
+  // Méthode pour consulter les détails d'une etudiant
+  consulterProfesseur(id: string): void {
+    this.etudiantService.consulterEtudiant(id).subscribe(
+      (data) => {
+        this.etudiant = data; 
+        console.log('Etudiant consultée', data);
+      },
+      (error) => {
+        console.error('Erreur lors de la consultation de la etudiant', error);
+      }
+    );
+  }
+
+  // Méthode pour mettre à jour une etudiant
+  updateProfesseur(): void {
+    this.etudiantService.updateEtudiant(this.etudiant).subscribe(
+      (data) => {
+        
+        const index = this.etudiants.findIndex((c) => c.id === data.id);
+        if (index !== -1) {
+          this.etudiants[index] = data;
+        }
+        console.log('etudiant mise à jour avec succès', data);
+      },
+      (error) => {
+        console.error('Erreur lors de la mise à jour de l\'etudiant', error);
+      }
+    );
   }
 }

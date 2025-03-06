@@ -1,15 +1,15 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { IClasse } from '../../../interfaces/classe.interface';
 
 @Component({
-  selector: 'app-classe-details',
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: './classe-details.component.html',
-  styleUrls: ['./classe-details.component.css']
+    selector: 'app-classe-details',
+    imports: [CommonModule],
+    templateUrl: './classe-details.component.html',
+    styleUrls: ['./classe-details.component.css']
 })
 export class ClasseDetailsComponent {
-  @Input() classe: any;
+  @Input() classe: IClasse | null = null;
   @Output() close = new EventEmitter<void>();
 
   onClose() {
@@ -17,6 +17,6 @@ export class ClasseDetailsComponent {
   }
 
   getOccupationPercentage(): number {
-    return Math.round((this.classe.nombreEtudiants / this.classe.capacite) * 100);
+    return Math.round((this.classe?.effectif || 0 / this.classe!.capacite) * 100);
   }
 }

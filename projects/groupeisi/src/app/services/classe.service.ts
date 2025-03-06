@@ -35,7 +35,7 @@ export class ClasseService {
         return this.http.get<IClasse>(url);
     }
 
-    updateProduit(classe :IClasse) : Observable<IClasse>{
+    updateClasse(classe :IClasse) : Observable<IClasse>{
         return this.http.put<IClasse>(this.apiURL, classe, httpOptions);
     }
   

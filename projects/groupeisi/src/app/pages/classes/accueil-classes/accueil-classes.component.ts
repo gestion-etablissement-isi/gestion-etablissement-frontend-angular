@@ -7,20 +7,19 @@ import { ClasseService } from '../../../services/classe.service';
 import { IClasse } from '../../../interfaces/classe.interface';
 
 @Component({
-  selector: 'app-accueil-classes',
-  standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule,
-    ClasseDetailsComponent,
-    ClasseFormComponent,
-  ],
-  templateUrl: './accueil-classes.component.html',
-  styleUrl: './accueil-classes.component.css',
+    selector: 'app-accueil-classes',
+    imports: [
+        CommonModule,
+        FormsModule,
+        ClasseDetailsComponent,
+        ClasseFormComponent,
+    ],
+    templateUrl: './accueil-classes.component.html',
+    styleUrl: './accueil-classes.component.css'
 })
 export class AccueilClassesComponent {
   classes: IClasse[] = [];
-  classe: IClasse = { id: '', nom: '', anneeScolaire: '', capacite: 0 };
+  classe: IClasse = {nom: '', anneeScolaire: '', capacite: 0 };
   filteredClasses: IClasse[] = [];
   selectedClasse: IClasse | null = null;
 
@@ -30,14 +29,12 @@ export class AccueilClassesComponent {
   isEditing: boolean = false;
 
   // Filtres
-  filtreNiveau: string = '';
   filtreAnneeScolaire: string = '';
-  filtreStatut: string = '';
 
   // Options pour les filtres
-  niveaux: string[] = ['Lycée', 'Collège', 'Primaire'];
+  
   anneesScolaires: string[] = ['2024-2025', '2023-2024', '2022-2023'];
-  statuts: string[] = ['Active', 'Inactive'];
+  
 
   ngOnInit() {
     this.getClasses();
@@ -102,7 +99,7 @@ export class AccueilClassesComponent {
 
   // Méthode pour mettre à jour une classe
   updateClasse(): void {
-    this.classeService.updateProduit(this.classe).subscribe(
+    this.classeService.updateClasse(this.classe).subscribe(
       (data) => {
         // Mettre à jour l'élément dans la liste des classes
         const index = this.classes.findIndex((c) => c.id === data.id);
@@ -139,9 +136,7 @@ export class AccueilClassesComponent {
 
   resetFilters() {
     this.searchTerm = '';
-    this.filtreNiveau = '';
     this.filtreAnneeScolaire = '';
-    this.filtreStatut = '';
     this.applyFilters();
   }
 

@@ -88,18 +88,7 @@
   
         
   
-        <div>
-          <label for="statut" class="block text-sm font-medium text-gray-700 mb-1">Statut</label>
-          <select 
-            id="statut" 
-            [(ngModel)]="filtreStatut" 
-            (change)="applyFilters()"
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
-          >
-            <option value="">Tous les statuts</option>
-            <option *ngFor="let statut of statuts" [value]="statut">{{ statut }}</option>
-          </select>
-        </div>
+        
   
         <div class="flex items-end">
           <button 
@@ -125,7 +114,6 @@
               <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Volume Horaire</th>
               <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Coefficient</th>
               <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Année académique</th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Statut</th>
               <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
@@ -145,13 +133,13 @@
                 </div>
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-900">{{ cours.matiere }}</div>
+                <div class="text-sm text-gray-900">{{ getMatiere(cours.matiereId) }}</div>
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-900">{{ cours.professeur }}</div>
+                <div class="text-sm text-gray-900">{{ getProfesseur(cours.professeurId) }}</div>
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-900">{{ cours.classe }}</div>
+                <div class="text-sm text-gray-900">{{ getClasse(cours.classeId) }}</div>
               </td>
               
               
@@ -166,14 +154,7 @@
               <td class="px-6 py-4 whitespace-nowrap">
                 <div class="text-sm text-gray-900">{{ cours.anneeAcademique }}</div>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <span 
-                  class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full" 
-                  [ngClass]="cours.statut === 'Actif' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
-                >
-                  {{ cours.statut }}
-                </span>
-              </td>
+              
               <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                 <button 
                   (click)="showCoursDetails(cours)" 
@@ -208,6 +189,9 @@
   <app-cours-details 
     *ngIf="showDetails && selectedCour" 
     [cours]="selectedCour"
+    (getProfesseur)="getProfesseur($event)"
+    (getClasse)="getClasse($event)"
+    (getMatiere)="getMatiere($event)"
     (close)="closeDetails()"
   ></app-cours-details>
   
@@ -215,6 +199,12 @@
   <app-cours-form
     *ngIf="showAddForm"
     (close)="fermerModalAjouterCours()"
-    (coursAjoute)="ajouterCours($event)"
+    [classes]="classes"
+    [professeurs]="professeurs"
+    [matieres]="matieres"
+    (getProfesseur)="getProfesseur($event)"
+    (getClasse)="getClasse($event)"
+    (getMatiere)="getMatiere($event)"
+    (coursAjoute)="ajouterCours()"
   ></app-cours-form>
 

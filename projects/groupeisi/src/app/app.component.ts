@@ -7,15 +7,14 @@ import { CommonModule } from '@angular/common';
 import { InscriptionComponent } from './features/auth/components/inscription/inscription.component';
 
 @Component({
-  selector: 'app-root',
-  standalone: true,
-  imports: [
-    RouterOutlet, 
-    ReactiveFormsModule,
-    CommonModule,
-  ],
-  templateUrl: './app.component.html',
-  styleUrl: './app.component.css'
+    selector: 'app-root',
+    imports: [
+        RouterOutlet,
+        ReactiveFormsModule,
+        CommonModule,
+    ],
+    templateUrl: './app.component.html',
+    styleUrl: './app.component.css'
 })
 export class AppComponent {
   title = 'groupeisi';

@@ -37,7 +37,7 @@
       </div>
 
       <!-- Filtres -->
-      <div>
+      <!-- <div>
         <label for="classe" class="block text-sm font-medium text-gray-700 mb-1">Classe</label>
         <select 
           id="classe" 
@@ -48,20 +48,9 @@
           <option value="">Toutes les classes</option>
           <option *ngFor="let classe of classes" [value]="classe">{{ classe }}</option>
         </select>
-      </div>
+      </div> -->
 
-      <div>
-        <label for="niveau" class="block text-sm font-medium text-gray-700 mb-1">Niveau</label>
-        <select 
-          id="niveau" 
-          [(ngModel)]="filtreNiveau" 
-          (change)="applyFilters()"
-          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
-        >
-          <option value="">Tous les niveaux</option>
-          <option *ngFor="let niveau of niveaux" [value]="niveau">{{ niveau }}</option>
-        </select>
-      </div>
+     
 
       <div>
         <label for="statut" class="block text-sm font-medium text-gray-700 mb-1">Statut</label>
@@ -95,8 +84,7 @@
           <tr>
             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nom</th>
             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Classe</th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Niveau</th>
+            <!-- <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Classe</th> -->
             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Statut</th>
             <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
           </tr>
@@ -115,19 +103,16 @@
                 </div>
                 <div class="ml-4">
                   <div class="text-sm font-medium text-gray-900">{{ etudiant.prenom }} {{ etudiant.nom }}</div>
-                  <div class="text-sm text-gray-500">{{ etudiant.telephone }}</div>
+                  <div class="text-sm text-gray-500">{{ etudiant.tel }}</div>
                 </div>
               </div>
             </td>
             <td class="px-6 py-4 whitespace-nowrap">
               <div class="text-sm text-gray-900">{{ etudiant.email }}</div>
             </td>
-            <td class="px-6 py-4 whitespace-nowrap">
+            <!-- <td class="px-6 py-4 whitespace-nowrap">
               <div class="text-sm text-gray-900">{{ etudiant.classe }}</div>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap">
-              <div class="text-sm text-gray-900">{{ etudiant.niveau }}</div>
-            </td>
+            </td> -->
             <td class="px-6 py-4 whitespace-nowrap">
               <span 
                 class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full" 
@@ -176,8 +161,8 @@
 <!-- Modal d'ajout d'étudiant -->
 <app-etudiant-form
   *ngIf="showAddForm"
-  [classes]="classes"
-  [niveaux]="niveaux"
+  
   (close)="closeAddForm()"
-  (save)="addEtudiant($event)"
+  (save)="ajouterEtudiant()"
 ></app-etudiant-form>
+<!-- [classes]="classes" -->

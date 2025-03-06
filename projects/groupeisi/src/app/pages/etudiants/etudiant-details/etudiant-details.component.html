@@ -14,18 +14,18 @@
           <!-- Avatar et informations principales -->
           <div class="flex flex-col items-center">
             <div class="avatar-large bg-accent text-white rounded-full flex items-center justify-center text-2xl font-bold mb-3">
-              {{ etudiant()?.prenom?.charAt(0) }}{{ etudiant()?.nom?.charAt(0) }}
+              {{ etudiant?.prenom?.charAt(0) }}{{ etudiant?.nom?.charAt(0) }}
             </div>
             <h3 class="text-lg font-semibold text-center">
-              {{ etudiant()?.prenom }} {{ etudiant()?.nom }}
+              {{ etudiant?.prenom }} {{ etudiant?.nom }}
             </h3>
-            <p class="text-sm text-gray-500 text-center">ID: {{ etudiant()?.id }}</p>
+            <p class="text-sm text-gray-500 text-center">ID: {{ etudiant?.id }}</p>
             <div class="mt-3">
               <span
                 class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full"
-                [ngClass]="etudiant()?.statut === 'Actif' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
+                [ngClass]="etudiant?.statut === 'Actif' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
               >
-                {{ etudiant()?.statut }}
+                {{ etudiant?.statut }}
               </span>
             </div>
           </div>
@@ -34,28 +34,22 @@
           <div class="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
             <div class="info-group">
               <h4 class="info-label">Email</h4>
-              <p class="info-value">{{ etudiant()?.email }}</p>
+              <p class="info-value">{{ etudiant?.email }}</p>
             </div>
   
             <div class="info-group">
               <h4 class="info-label">Téléphone</h4>
-              <p class="info-value">{{ etudiant()?.telephone }}</p>
+              <p class="info-value">{{ etudiant?.tel }}</p>
             </div>
   
-            <div class="info-group">
-              <h4 class="info-label">Date de naissance</h4>
-              <p class="info-value">{{ formatDate(etudiant()?.dateNaissance) }}</p>
-            </div>
+            
   
-            <div class="info-group">
+            <!-- <div class="info-group">
               <h4 class="info-label">Classe</h4>
               <p class="info-value">{{ etudiant()?.classe }}</p>
-            </div>
+            </div> -->
   
-            <div class="info-group">
-              <h4 class="info-label">Niveau</h4>
-              <p class="info-value">{{ etudiant()?.niveau }}</p>
-            </div>
+            
           </div>
         </div>
       </div>

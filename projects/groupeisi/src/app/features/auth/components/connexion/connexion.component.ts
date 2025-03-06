@@ -7,11 +7,10 @@ import { User } from '../../models/user.model';
 import { ConnexionService } from '../../services/connexion.service';
 
 @Component({
-  selector: 'app-connexion',
-  standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
-  templateUrl: './connexion.component.html',
-  styleUrls: ['./connexion.component.scss']
+    selector: 'app-connexion',
+    imports: [CommonModule, ReactiveFormsModule],
+    templateUrl: './connexion.component.html',
+    styleUrls: ['./connexion.component.scss']
 })
 export class ConnexionComponent implements OnInit {
   private readonly service = inject(ConnexionService);

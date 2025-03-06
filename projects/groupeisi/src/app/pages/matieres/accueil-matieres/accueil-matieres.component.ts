@@ -2,80 +2,52 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatiereFormComponent } from '../matiere-form/matiere-form.component';
-
-interface Matiere {
-  id: number;
-  libelle: string;
-  statut: 'Actif' | 'Inactif';
-}
+import { IMatiere } from '../../../interfaces/matiere.interface';
+import { MatiereService } from '../../../services/matiere/matiere.service';
 
 @Component({
-  selector: 'app-accueil-matieres',
-  standalone: true,
-  imports: [CommonModule, FormsModule, MatiereFormComponent],
-  templateUrl: './accueil-matieres.component.html',
-  styleUrl: './accueil-matieres.component.css'
+    selector: 'app-accueil-matieres',
+    imports: [CommonModule, FormsModule, MatiereFormComponent],
+    templateUrl: './accueil-matieres.component.html',
+    styleUrl: './accueil-matieres.component.css'
 })
 export class AccueilMatieresComponent implements OnInit {
-  matieres: Matiere[] = [];
-  filteredMatieres: Matiere[] = [];
+  matieres: IMatiere[] = [];
+  matiere: IMatiere = {libelle: '', statut: ''}
+  filteredMatieres: IMatiere[] = [];
+  selectedMatiere: IMatiere | null = null;
   searchTerm: string = '';
-  selectedMatiere: Matiere | null = null;
   showAddForm: boolean = false;
   showDetails: boolean = false;
   
-  filtreStatut: string = '';
-  
-  statuts: string[] = ['Actif', 'Inactif'];
 
   ngOnInit() {
     // Simuler le chargement des données depuis une API
-    this.loadmatieres();
+    this.getMatieres();
   }
 
-  loadmatieres() {
-    // Données fictives pour la démonstration
-    this.matieres = [
-      {
-        id: 1,
-        libelle: 'Algorithme',
-        statut: 'Actif'
+  constructor(private matiereService: MatiereService) {}
+
+  // Méthode pour récupérer toutes les matieres
+  getMatieres(): void {
+    this.matiereService.getAllMatieres().subscribe(
+      (data) => {
+        this.matieres = data;
       },
-      {
-        id: 2,
-        libelle: 'Java',
-        statut: 'Actif'
-      },
-      {
-        id: 3,
-        libelle: 'C#',
-        statut: 'Actif'
-      },
-      {
-        id: 4,
-        libelle: 'DevOps',
-        statut: 'Inactif'
-      },
-      {
-        id: 5,
-        libelle: 'Angular',
-        statut: 'Actif'
+      (error) => {
+        console.error('Erreur lors de la récupération des matieres', error);
       }
-    ];
-    
-    this.applyFilters();
+    );
   }
 
   applyFilters() {
-    this.filteredMatieres = this.matieres.filter(matiere => {
-      // Recherche textuelle
-      const searchMatch = !this.searchTerm || 
+    this.filteredMatieres = this.matieres.filter((matiere) => {
+      // Recherche textuelle sur le nom
+      const searchMatch =
+        !this.searchTerm ||
         matiere.libelle.toLowerCase().includes(this.searchTerm.toLowerCase());
-      
-      // Filtres par catégorie
-      const statutMatch = !this.filtreStatut || matiere.statut === this.filtreStatut;
-      
-      return searchMatch && statutMatch;
+
+      return searchMatch;
     });
   }
 
@@ -85,7 +57,6 @@ export class AccueilMatieresComponent implements OnInit {
 
   resetFilters() {
     this.searchTerm = '';
-    this.filtreStatut = '';
     this.applyFilters();
   }
 
@@ -102,13 +73,65 @@ export class AccueilMatieresComponent implements OnInit {
     this.showAddForm = false;
   }
 
-  addmatiere(matiere: Matiere) {
-    // Simuler l'ajout d'un matiere avec un nouvel ID
-    const newId = Math.max(...this.matieres.map(m => m.id)) + 1;
-    const newMatiere = { ...matiere, id: newId };
-    
-    this.matieres.push(newMatiere);
-    this.applyFilters();
-    this.closeAddForm();
+  // Méthode pour ajouter une matiere
+  ajouterMatiere(): void {
+    this.matiereService.ajouterMatiere(this.matiere).subscribe(
+      (data) => {
+        this.matieres.push(data);
+        console.log('Matiere ajoutée avec succès', data);
+      },
+      (error) => {
+        console.error("Erreur lors de l'ajout de la matiere", error);
+      }
+    );
   }
+
+  // Méthode pour supprimer une matiere
+  supprimerMatiere(id: string): void {
+    if (
+      confirm(`Êtes-vous sûr de vouloir supprimer la matiere ?`)
+    ) {
+      this.matiereService.supprimerMatiere(id).subscribe(
+        () => {
+          this.matieres = this.matieres.filter((matiere) => matiere.id !== id); // Supprimer la matiere de la liste
+          console.log('Matiere supprimée avec succès');
+        },
+        (error) => {
+          console.error('Erreur lors de la suppression de la matiere', error);
+        }
+      );
+    }
+  }
+
+  // Méthode pour consulter les détails d'une matiere
+  consulterMatiere(id: string): void {
+    this.matiereService.consulterMatiere(id).subscribe(
+      (data) => {
+        this.matiere = data; 
+        console.log('Matiere consultée', data);
+      },
+      (error) => {
+        console.error('Erreur lors de la consultation de la matiere', error);
+      }
+    );
+  }
+
+  // Méthode pour mettre à jour une matiere
+  updateMatiere(): void {
+    this.matiereService.updateMatiere(this.matiere).subscribe(
+      (data) => {
+        
+        const index = this.matieres.findIndex((c) => c.id === data.id);
+        if (index !== -1) {
+          this.matieres[index] = data;
+        }
+        console.log('Matiere mise à jour avec succès', data);
+      },
+      (error) => {
+        console.error('Erreur lors de la mise à jour de la matiere', error);
+      }
+    );
+  }
+
+  
 }

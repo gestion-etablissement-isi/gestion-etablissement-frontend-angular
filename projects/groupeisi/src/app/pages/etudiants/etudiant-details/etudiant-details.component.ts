@@ -1,14 +1,14 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { IEtudiant } from '../../../interfaces/etudiant.interface';
 @Component({
-  selector: 'app-etudiant-details',
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: './etudiant-details.component.html',
-  styleUrl: './etudiant-details.component.css'
+    selector: 'app-etudiant-details',
+    imports: [CommonModule],
+    templateUrl: './etudiant-details.component.html',
+    styleUrl: './etudiant-details.component.css'
 })
 export class EtudiantDetailsComponent {
-  @Input() etudiant: any;
+  @Input() etudiant: IEtudiant | null = null;
   @Output() close = new EventEmitter<void>();
 
   onClose() {

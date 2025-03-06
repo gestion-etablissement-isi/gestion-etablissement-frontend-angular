@@ -3,27 +3,25 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ProfesseurDetailsComponent } from '../professeur-details/professeur-details.component';
 import { ProfesseurFormComponent } from '../professeur-form/professeur-form.component';
+import { IProfesseur } from '../../../interfaces/professeur.interface';
+import { ProfesseurService } from '../../../services/professeur/professeur.service';
+import { MatiereService } from '../../../services/matiere/matiere.service';
+import { IMatiere } from '../../../interfaces/matiere.interface';
+import { Observable, map } from 'rxjs';
 
-interface Professeur {
-  id: number;
-  nom: string;
-  prenom: string;
-  email: string;
-  matiere: string,
-  statut: 'Actif' | 'Inactif';
-}
 @Component({
-  selector: 'app-accueil-professeurs',
-  standalone: true,
-  imports: [CommonModule, FormsModule, ProfesseurDetailsComponent, ProfesseurFormComponent],
-  templateUrl: './accueil-professeurs.component.html',
-  styleUrl: './accueil-professeurs.component.css'
+    selector: 'app-accueil-professeurs',
+    imports: [CommonModule, FormsModule, ProfesseurDetailsComponent, ProfesseurFormComponent],
+    templateUrl: './accueil-professeurs.component.html',
+    styleUrl: './accueil-professeurs.component.css'
 })
 export class AccueilProfesseursComponent {
-  professeurs: Professeur[] = [];
-  filteredProfesseurs: Professeur[] = [];
+  professeurs: IProfesseur[] = [];
+  filteredProfesseurs: IProfesseur[] = [];
+  selectedProfesseur: IProfesseur | null = null;
+  professeur: IProfesseur = {nom: '', prenom: '', email: '', matiere: '', statut: ''};
+  
   searchTerm: string = '';
-  selectedProfesseur: Professeur | null = null;
   showAddForm: boolean = false;
   showDetails: boolean = false;
   
@@ -32,60 +30,46 @@ export class AccueilProfesseursComponent {
   filtreStatut: string = '';
   
   // Options pour les filtres
-  matieres: string[] = ['Algorithme', 'Java', 'C#', 'DevOps', 'Angular'];
+  matieres: IMatiere[] = [];
   statuts: string[] = ['Actif', 'Inactif'];
 
   ngOnInit() {
     // Simuler le chargement des données depuis une API
-    this.loadProfesseurs();
+    this.getProfesseurs();
+    this.loadMatiere();
   }
+  constructor(
+    private matiereService: MatiereService,
+    private professeurService: ProfesseurService
+    ) {}
 
-  loadProfesseurs() {
-    // Données fictives pour la démonstration
-    this.professeurs = [
-      {
-        id: 1,
-        nom: 'Dupont',
-        prenom: 'Marie',
-        email: 'marie.dupont@example.com',
-        matiere: 'Algorithme',
-        statut: 'Actif'
+    getMatiere(matiereId: string): Observable<string> {
+      return this.matiereService.consulterMatiere(matiereId).pipe(
+        map((matiere) => matiere ? matiere.libelle : 'Matière introuvable')
+      );
+    }
+  
+    loadMatiere() {
+    this.matiereService.getAllMatieres().subscribe(
+      (data) => {
+        this.matieres = data;
       },
-      {
-        id: 2,
-        nom: 'Martin',
-        prenom: 'Lucas',
-        email: 'lucas.martin@example.com',
-        matiere: 'Java',
-        statut: 'Actif'
-      },
-      {
-        id: 3,
-        nom: 'Bernard',
-        prenom: 'Emma',
-        email: 'emma.bernard@example.com',
-        matiere: 'C#',
-        statut: 'Actif'
-      },
-      {
-        id: 4,
-        nom: 'Petit',
-        prenom: 'Thomas',
-        email: 'thomas.petit@example.com',
-        matiere: 'DevOps',
-        statut: 'Inactif'
-      },
-      {
-        id: 5,
-        nom: 'Robert',
-        prenom: 'Léa',
-        email: 'lea.robert@example.com',
-        matiere: 'Angular',
-        statut: 'Actif'
+      (error) => {
+        console.error('Erreur lors de la récupération des matieres', error);
       }
-    ];
-    
-    this.applyFilters();
+    );
+    }
+
+  // Méthode pour récupérer tous les professeurs
+  getProfesseurs(): void {
+    this.professeurService.getAllProfesseurs().subscribe(
+      (data) => {
+        this.professeurs = data;
+      },
+      (error) => {
+        console.error('Erreur lors de la récupération des professeurs', error);
+      }
+    );
   }
 
   applyFilters() {
@@ -115,7 +99,7 @@ export class AccueilProfesseursComponent {
     this.applyFilters();
   }
 
-  showProfesseurDetails(professeur: Professeur) {
+  showProfesseurDetails(professeur: IProfesseur) {
     this.selectedProfesseur = professeur;
     this.showDetails = true;
     this.showAddForm = false;
@@ -136,13 +120,62 @@ export class AccueilProfesseursComponent {
     this.showAddForm = false;
   }
 
-  addProfesseur(professeur: Professeur) {
-    // Simuler l'ajout d'un professeur avec un nouvel ID
-    const newId = Math.max(...this.professeurs.map(e => e.id)) + 1;
-    const newprofesseur = { ...professeur, id: newId };
-    
-    this.professeurs.push(newprofesseur);
-    this.applyFilters();
-    this.closeAddForm();
+  ajouterProfesseur(): void {
+    this.professeurService.ajouterProfesseur(this.professeur).subscribe(
+      (data) => {
+        this.professeurs.push(data);
+        console.log('Professeur ajoutée avec succès', data);
+      },
+      (error) => {
+        console.error("Erreur lors de l'ajout du professeur", error);
+      }
+    );
+  }
+
+  // Méthode pour supprimer une professeur
+  supprimerProfesseur(id: string): void {
+    if (
+      confirm(`Êtes-vous sûr de vouloir supprimer le professeur  ?`)
+    ) {
+      this.professeurService.supprimerProfesseur(id).subscribe(
+        () => {
+          this.professeurs = this.professeurs.filter((professeur) => professeur.id !== id); // Supprimer la matiere de la liste
+          console.log('Professeur supprimée avec succès');
+        },
+        (error) => {
+          console.error('Erreur lors de la suppression du professeur', error);
+        }
+      );
+    }
+  }
+
+  // Méthode pour consulter les détails d'une professeur
+  consulterProfesseur(id: string): void {
+    this.professeurService.consulterProfesseur(id).subscribe(
+      (data) => {
+        this.professeur = data; 
+        console.log('Professeur consultée', data);
+      },
+      (error) => {
+        console.error('Erreur lors de la consultation de la professeur', error);
+      }
+    );
+  }
+
+  // Méthode pour mettre à jour une professeur
+  updateProfesseur(): void {
+    this.professeurService.updateProfesseur(this.professeur).subscribe(
+      (data) => {
+        
+        const index = this.professeurs.findIndex((c) => c.id === data.id);
+        if (index !== -1) {
+          this.professeurs[index] = data;
+        }
+        console.log('Professeur mise à jour avec succès', data);
+      },
+      (error) => {
+        console.error('Erreur lors de la mise à jour de la professeur', error);
+      }
+    );
   }
 }

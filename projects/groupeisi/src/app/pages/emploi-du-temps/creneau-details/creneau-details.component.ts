@@ -29,11 +29,10 @@ interface CreneauDescription {
 }
 
 @Component({
-  selector: 'app-creneau-details',
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: './creneau-details.component.html',
-  styleUrl: './creneau-details.component.css'
+    selector: 'app-creneau-details',
+    imports: [CommonModule],
+    templateUrl: './creneau-details.component.html',
+    styleUrl: './creneau-details.component.css'
 })
 export class CreneauDetailsComponent {
   @Input() creneau: Creneau | null = null;

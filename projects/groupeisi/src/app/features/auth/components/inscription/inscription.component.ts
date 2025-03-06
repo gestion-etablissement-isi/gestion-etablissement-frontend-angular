@@ -5,11 +5,10 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 
 @Component({
-  selector: 'app-inscription',
-  standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
-  templateUrl: './inscription.component.html',
-  styleUrls: ['./inscription.component.scss']
+    selector: 'app-inscription',
+    imports: [CommonModule, ReactiveFormsModule],
+    templateUrl: './inscription.component.html',
+    styleUrls: ['./inscription.component.scss']
 })
 export class InscriptionComponent {
   inscriptionForm: FormGroup;

@@ -1,13 +1,13 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { IEtudiant } from '../../../interfaces/etudiant.interface';
 
 @Component({
-  selector: 'app-etudiant-form',
-  standalone: true,
-  imports: [CommonModule, FormsModule],
-  templateUrl: './etudiant-form.component.html',
-  styleUrl: './etudiant-form.component.css'
+    selector: 'app-etudiant-form',
+    imports: [CommonModule, FormsModule],
+    templateUrl: './etudiant-form.component.html',
+    styleUrl: './etudiant-form.component.css'
 })
 export class EtudiantFormComponent {
   @Input() classes: string[] = [];
@@ -15,14 +15,12 @@ export class EtudiantFormComponent {
   @Output() close = new EventEmitter<void>();
   @Output() save = new EventEmitter<any>();
 
-  etudiant = {
+  etudiant:IEtudiant = {
     nom: '',
     prenom: '',
     email: '',
-    telephone: '',
-    dateNaissance: '',
-    classe: '',
-    niveau: '',
+    tel: '',
+    // classe: '',
     statut: 'Actif' as 'Actif' | 'Inactif'
   };
 
@@ -54,25 +52,16 @@ export class EtudiantFormComponent {
       isValid = false;
     }
 
-    if (!this.etudiant.telephone) {
+    if (!this.etudiant.tel) {
       this.formErrors['telephone'] = 'Le téléphone est requis';
       isValid = false;
     }
 
-    if (!this.etudiant.dateNaissance) {
-      this.formErrors['dateNaissance'] = 'La date de naissance est requise';
-      isValid = false;
-    }
+    // if (!this.etudiant.classe) {
+    //   this.formErrors['classe'] = 'La classe est requise';
+    //   isValid = false;
+    // }
 
-    if (!this.etudiant.classe) {
-      this.formErrors['classe'] = 'La classe est requise';
-      isValid = false;
-    }
-
-    if (!this.etudiant.niveau) {
-      this.formErrors['niveau'] = 'Le niveau est requis';
-      isValid = false;
-    }
 
     return isValid;
   }

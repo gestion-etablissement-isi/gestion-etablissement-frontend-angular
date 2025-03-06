@@ -38,11 +38,10 @@ interface JourCalendrier {
   estMoisActuel: boolean;
 }
 @Component({
-  selector: 'app-accueil-emploi-du-temps',
-  standalone: true,
-  imports: [CommonModule, FormsModule, CreneauDetailsComponent, AjouterCreneauComponent],
-  templateUrl: './accueil-emploi-du-temps.component.html',
-  styleUrl: './accueil-emploi-du-temps.component.css'
+    selector: 'app-accueil-emploi-du-temps',
+    imports: [CommonModule, FormsModule, CreneauDetailsComponent, AjouterCreneauComponent],
+    templateUrl: './accueil-emploi-du-temps.component.html',
+    styleUrl: './accueil-emploi-du-temps.component.css'
 })
 export class AccueilEmploiDuTempsComponent implements OnInit  {
   // Données

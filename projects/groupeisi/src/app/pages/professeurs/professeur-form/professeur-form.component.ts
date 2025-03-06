@@ -1,22 +1,24 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { IProfesseur } from '../../../interfaces/professeur.interface';
+import { IMatiere } from '../../../interfaces/matiere.interface';
 
 @Component({
-  selector: 'app-professeur-form',
-  standalone: true,
-  imports: [CommonModule, FormsModule],
-  templateUrl: './professeur-form.component.html',
-  styleUrl: './professeur-form.component.css'
+    selector: 'app-professeur-form',
+    imports: [CommonModule, FormsModule],
+    templateUrl: './professeur-form.component.html',
+    styleUrl: './professeur-form.component.css'
 })
 export class ProfesseurFormComponent {
-  @Input() matieres: string[] = [];
+  @Input() matieres: IMatiere[] = [];
   @Input() niveaux: string[] = [];
   @Input() user: any =  {};
   @Output() close = new EventEmitter<void>();
   @Output() save = new EventEmitter<any>();
+  @Output() getMatiere = new EventEmitter<string>();
 
-  professeur = {
+  professeur: IProfesseur = {
     nom: '',
     prenom: '',
     email: '',

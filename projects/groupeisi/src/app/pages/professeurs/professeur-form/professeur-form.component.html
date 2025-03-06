@@ -68,7 +68,7 @@
               [ngClass]="{'input-error': formErrors['matiere']}"
             >
               <option value="" disabled>Sélectionner une matiere</option>
-              <option *ngFor="let matiere of matieres" [value]="matiere">{{ matiere }}</option>
+              <option *ngFor="let matiere of matieres" [value]="matiere.id">{{ getMatiere.emit(matiere.id) }}</option>
             </select>
             <p *ngIf="formErrors['matiere']" class="error-message">{{ formErrors['matiere'] }}</p>
           </div>

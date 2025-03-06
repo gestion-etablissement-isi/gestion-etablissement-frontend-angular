@@ -74,7 +74,7 @@
                 required
               >
                 <option value="" disabled selected>Sélectionner une matière</option>
-                <option *ngFor="let matiere of matieres" [value]="matiere">{{ matiere }}</option>
+                <option *ngFor="let matiere of matieres" [value]="matiere.id">{{ getMatiere.emit(matiere.id) }}</option>
               </select>
             </div>
 
@@ -88,7 +88,7 @@
                 required
               >
                 <option value="" disabled selected>Sélectionner un professeur</option>
-                <option *ngFor="let prof of professeurs" [value]="prof.nom">{{ prof.nom }} ({{ prof.specialite }})</option>
+                <option *ngFor="let prof of professeurs" [value]="prof.id">{{ getProfesseur.emit(prof.id) }}</option>
               </select>
             </div>
 
@@ -104,7 +104,7 @@
                 required
               >
                 <option value="" disabled selected>Sélectionner une classe</option>
-                <option *ngFor="let classe of classes" [value]="classe">{{ classe }}</option>
+                <option *ngFor="let classe of classes" [value]="classe.id">{{ getClasse.emit(classe.id) }}</option>
               </select>
             </div>
           </div>
