@@ -9,6 +9,8 @@ import { AccueilMatieresComponent } from './pages/matieres/accueil-matieres/accu
 import { AccueilEmploiDuTempsComponent } from './pages/emploi-du-temps/accueil-emploi-du-temps/accueil-emploi-du-temps.component';
 import { AccueilCoursComponent } from './pages/cours/accueil-cours/accueil-cours.component';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
+import { AccueilClassesComponent } from './pages/classes/accueil-classes/accueil-classes.component';
+import { ClasseFormComponent } from './pages/classes/classe-form/classe-form.component';
 
 export const routes: Routes = [
     {
@@ -29,7 +31,13 @@ export const routes: Routes = [
             },
             {
                 path: 'classes',
-                component: AccueilProfesseursComponent
+                component: AccueilClassesComponent,
+                children: [
+                    {
+                        path: 'modifier',
+                        component: ClasseFormComponent
+                    }
+                ]
             },
             {
                 path: 'matieres',

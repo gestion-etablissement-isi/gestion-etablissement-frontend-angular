@@ -1,0 +1,95 @@
+<div class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>{{ isEditing ? 'Modifier la classe' : 'Ajouter une classe' }}</h2>
+        <button type="button" class="close-btn" (click)="onClose()">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+  
+      <div class="modal-body">
+        <form (ngSubmit)="onSubmit()" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Nom -->
+          <div class="form-group">
+            <label for="nom" class="form-label">Nom <span class="text-error">*</span></label>
+            <input 
+              type="text" 
+              id="nom" 
+              name="nom" 
+              [(ngModel)]="_classe.nom" 
+              class="form-input" 
+              [ngClass]="{'input-error': formErrors['nom']}"
+              required
+            >
+            <p *ngIf="formErrors['nom']" class="error-message">{{ formErrors['nom'] }}</p>
+          </div>
+  
+         
+  
+          <!-- Année scolaire -->
+          <div class="form-group">
+            <label for="anneeScolaire" class="form-label">Année scolaire <span class="text-error">*</span></label>
+            <select 
+              id="anneeScolaire" 
+              name="anneeScolaire" 
+              [(ngModel)]="_classe.anneeScolaire" 
+              class="form-input"
+              [ngClass]="{'input-error': formErrors['anneeScolaire']}"
+              required
+            >
+              <option value="" disabled selected>Sélectionner une année</option>
+              <option *ngFor="let annee of anneesScolaires" [value]="annee">{{ annee }}</option>
+            </select>
+            <p *ngIf="formErrors['anneeScolaire']" class="error-message">{{ formErrors['anneeScolaire'] }}</p>
+          </div>
+  
+          
+  
+          <!-- Capacité -->
+          <div class="form-group">
+            <label for="capacite" class="form-label">Capacité <span class="text-error">*</span></label>
+            <input 
+              type="number" 
+              id="capacite" 
+              name="capacite" 
+              [(ngModel)]="_classe.capacite" 
+              class="form-input"
+              [ngClass]="{'input-error': formErrors['capacite']}"
+              required
+            >
+            <p *ngIf="formErrors['capacite']" class="error-message">{{ formErrors['capacite'] }}</p>
+          </div>
+
+          <!-- Effectif -->
+          <div class="form-group">
+            <label for="capacite" class="form-label">Effectif <span class="text-error">*</span></label>
+            <input 
+              type="number" 
+              id="effectif" 
+              name="effectif" 
+              [(ngModel)]="_classe.effectif" 
+              class="form-input"
+              [ngClass]="{'input-error': formErrors['effectif']}"
+              required
+            >
+            <p *ngIf="formErrors['effectif']" class="error-message">{{ formErrors['effectif'] }}</p>
+          </div>
+  
+          
+        </form>
+      </div>
+  
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" (click)="onClose()">Annuler</button>
+        <button type="submit" class="btn-primary" (click)="onSubmit()">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+          </svg>
+          {{ isEditing ? 'Modifier' : 'Enregistrer' }}
+        </button>
+      </div>
+    </div>
+  </div>
+  
