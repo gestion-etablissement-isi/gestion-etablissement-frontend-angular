@@ -2,7 +2,7 @@ import { Routes } from '@angular/router';
 import { ConnexionComponent } from './features/auth/components/connexion/connexion.component';
 import { InscriptionComponent } from './features/auth/components/inscription/inscription.component';
 import { MainComponent } from './pages/main/main.component';
-import { AuthGuard } from './guards/auth.guard';
+import { AuthGuard } from './features/guards/auth.guard';
 import { AccueilEtudiantComponent } from './pages/etudiants/accueil-etudiant/accueil-etudiant.component';
 import { AccueilProfesseursComponent } from './pages/professeurs/accueil-professeurs/accueil-professeurs.component';
 import { AccueilClassesComponent } from './pages/classes/accueil-classes/accueil-classes.component';
@@ -49,7 +49,7 @@ export const routes: Routes = [
             path: 'emploi-du-temps',
             component: AccueilEmploiDuTempsComponent
         },
-        
+
         {
             path: 'cours',
             component: AccueilCoursComponent

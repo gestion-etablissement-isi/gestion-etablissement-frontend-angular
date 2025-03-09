@@ -5,14 +5,14 @@ import { ConnexionComponent } from './features/auth/components/connexion/connexi
 import { BrowserModule } from '@angular/platform-browser';
 import { CommonModule } from '@angular/common';
 import { InscriptionComponent } from './features/auth/components/inscription/inscription.component';
-import { AuthService } from './services/auth/auth.service';
+import { AuthService } from './features/services/auth/auth.service';
 @Component({
     selector: 'app-root',
     imports: [
         RouterOutlet,
         ReactiveFormsModule,
         CommonModule,
-        
+
     ],
     templateUrl: './app.component.html',
     styleUrl: './app.component.css'

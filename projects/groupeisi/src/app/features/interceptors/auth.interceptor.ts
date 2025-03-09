@@ -8,7 +8,7 @@ import { KeycloakService } from '../services/keycloak/keycloak.service';
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const keycloak = inject(KeycloakService);
   const platformId = inject(PLATFORM_ID);
-  
+
   // Vérifier si nous sommes dans un navigateur
   if (isPlatformBrowser(platformId) && keycloak.isLoggedIn()) {
     return from(keycloak.getToken()).pipe(
@@ -20,6 +20,6 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
       })
     );
   }
-  
+
   return next(req);
 };

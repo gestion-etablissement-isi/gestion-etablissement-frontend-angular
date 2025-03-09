@@ -2,14 +2,14 @@
 import { Injectable, PLATFORM_ID, inject } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { KeycloakService } from './keycloak.service';
-import { environment } from '../../../environments/environment';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class KeycloakInitService {
   private platformId = inject(PLATFORM_ID);
-  
+
   constructor(private keycloak: KeycloakService) {}
 
   init(): Promise<boolean> {

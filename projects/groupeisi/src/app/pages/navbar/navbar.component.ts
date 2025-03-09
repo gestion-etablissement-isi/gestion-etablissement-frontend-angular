@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { AuthService } from '../../services/auth/auth.service';
+import { AuthService } from '../../features/services/auth/auth.service';
 
 @Component({
     selector: 'app-navbar',
