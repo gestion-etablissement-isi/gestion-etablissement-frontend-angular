@@ -1,174 +1,180 @@
 <div class="space-y-6">
-    <!-- En-tête avec titre et bouton d'ajout -->
-    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-      <div>
-        <h1 class="text-2xl font-bold text-gray-800">Gestion des Classes</h1>
-        <p class="text-gray-600">Gérez les classes, leurs effectifs et leurs informations.</p>
-      </div>
-      <button 
-        (click)="openAddForm()" 
-        class="btn-primary flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark transition-colors">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-          <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
-        </svg>
-        <span>Ajouter une classe</span>
-      </button>
+  <!-- En-tête avec titre et bouton d'ajout -->
+  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-800">Gestion des Classes</h1>
+      <p class="text-gray-600">Gérez les classes, leurs effectifs et leurs informations.</p>
     </div>
-  
-    <!-- Filtres et recherche -->
-    <div class="bg-white rounded-lg shadow-sm p-4">
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <!-- Barre de recherche -->
-        <div class="md:col-span-4">
-          <div class="relative">
-            <input 
-              type="text" 
-              [(ngModel)]="searchTerm"
-              (input)="onSearch()"
-              placeholder="Rechercher une classe..." 
-              class="w-full px-4 py-2 border border-gray-300 rounded-md pl-10 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
-            >
-            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-            </div>
+    <button 
+      (click)="openAddForm()" 
+      class="btn-primary flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark transition-colors">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
+      </svg>
+      <span>Ajouter une classe</span>
+    </button>
+  </div>
+
+  <!-- Filtres et recherche -->
+  <div class="bg-white rounded-lg shadow-sm p-4">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <!-- Barre de recherche -->
+      <div class="md:col-span-4">
+        <div class="relative">
+          <input 
+            type="text" 
+            [(ngModel)]="searchTerm"
+            (input)="onSearch()"
+            placeholder="Rechercher une classe..." 
+            class="w-full px-4 py-2 border border-gray-300 rounded-md pl-10 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
+          >
+          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
           </div>
         </div>
-  
-        
-  
-        <div>
-          <label for="anneeScolaire" class="block text-sm font-medium text-gray-700 mb-1">Année scolaire</label>
-          <select 
-            id="anneeScolaire" 
-            [(ngModel)]="filtreAnneeScolaire" 
-            (change)="applyFilters()"
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
-          >
-            <option value="">Toutes les années</option>
-            <option *ngFor="let annee of anneesScolaires" [value]="annee">{{ annee }}</option>
-          </select>
-        </div>
-  
-        
-  
-        <div class="flex items-end">
-          <button 
-            (click)="resetFilters()" 
-            class="w-full px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
-          >
-            Réinitialiser les filtres
-          </button>
-        </div>
       </div>
-    </div>
-  
-    <!-- Tableau des classes -->
-    <div class="bg-white rounded-lg shadow-sm overflow-hidden">
-      <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200">
-          <thead class="bg-gray-50">
-            <tr>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Classe</th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Année scolaire</th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Effectif</th>
-              <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-            </tr>
-          </thead>
-          <tbody class="bg-white divide-y divide-gray-200">
-            <tr *ngIf="filteredClasses.length === 0">
-              <td colspan="7" class="px-6 py-4 text-center text-sm text-gray-500">
-                Aucune classe trouvée
-              </td>
-            </tr>
-            <tr *ngFor="let classe of filteredClasses" class="hover:bg-gray-50 transition-colors">
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm font-medium text-gray-900">{{ classe.nom }}</div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-900">{{ classe.anneeScolaire }}</div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="flex items-center">
-                  <span class="text-sm text-gray-900 mr-2">{{ classe.effectif }}/{{ classe.capacite }}</span>
-                  <div class="w-24 h-2 bg-gray-200 rounded-full overflow-hidden">
-                    <div 
-                      class="h-full rounded-full" 
-                      [style.width.%]="getOccupationPercentage(classe)"
-                      [ngClass]="{
-                        'bg-green-500': getOccupationPercentage(classe) < 80,
-                        'bg-yellow-500': getOccupationPercentage(classe) >= 80 && getOccupationPercentage(classe) < 90,
-                        'bg-red-500': getOccupationPercentage(classe) >= 90
-                      }"
-                    ></div>
-                  </div>
-                </div>
-              </td>
-              
-              <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                <button 
-                  (click)="showClasseDetails(classe)" 
-                  class="text-accent hover:text-primary-dark transition-colors mr-3"
-                >
-                  Détails
-                </button>
-                <button 
-                  (click)="openEditForm(classe)" 
-                  class="text-accent hover:text-primary-dark transition-colors mr-3"
-                >
-                  Modifier
-                </button>
-                <button 
-                  (click)="supprimerClasse(classe.id!)" 
-                  class="text-red-600 hover:text-red-800 transition-colors"
-                >
-                  Supprimer
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+
+      <div>
+        <label for="anneeScolaire" class="block text-sm font-medium text-gray-700 mb-1">Année scolaire</label>
+        <select 
+          id="anneeScolaire" 
+          [(ngModel)]="filtreAnneeScolaire" 
+          (change)="applyFilters()"
+          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
+        >
+          <option value="">Toutes les années</option>
+          <option *ngFor="let annee of anneesScolaires" [value]="annee">{{ annee }}</option>
+        </select>
       </div>
-    </div>
-  
-    <!-- Pagination (simplifiée) -->
-    <div class="flex justify-between items-center bg-white p-4 rounded-lg shadow-sm">
-      <div class="text-sm text-gray-700">
-        Affichage de <span class="font-medium">{{ filteredClasses.length }}</span> classes sur <span class="font-medium">{{ classes.length }}</span>
-      </div>
-      <div class="flex gap-2">
-        <button class="px-3 py-1 border border-gray-300 rounded-md text-sm disabled:opacity-50" disabled>
-          Précédent
-        </button>
-        <button class="px-3 py-1 border border-gray-300 rounded-md text-sm disabled:opacity-50" disabled>
-          Suivant
+
+      <div class="flex items-end">
+        <button 
+          (click)="resetFilters()" 
+          class="w-full px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
+        >
+          Réinitialiser les filtres
         </button>
       </div>
     </div>
   </div>
-  
-  <!-- Modal de détails de classe -->
-  <app-classe-details 
-    *ngIf="showDetails && selectedClasse" 
-    [classe]="selectedClasse"
-    (close)="closeDetails()"
-  ></app-classe-details>
-  
-  
 
-  <div 
+  <!-- Message de chargement ou d'erreur -->
+  <div *ngIf="classes.length === 0" class="bg-white rounded-lg shadow-sm p-8 text-center">
+    <p class="text-gray-600">Chargement des classes...</p>
+    <!-- Vous pourriez ajouter un indicateur de chargement ici -->
+  </div>
+
+  <!-- Tableau des classes (affiché uniquement s'il y a des données) -->
+  <div *ngIf="classes.length > 0" class="bg-white rounded-lg shadow-sm overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Classe</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Année scolaire</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Effectif</th>
+            <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          <tr *ngIf="filteredClasses.length === 0">
+            <td colspan="7" class="px-6 py-4 text-center text-sm text-gray-500">
+              Aucune classe trouvée
+            </td>
+          </tr>
+          <tr *ngFor="let classe of filteredClasses" class="hover:bg-gray-50 transition-colors">
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="text-sm font-medium text-gray-900">{{ classe.nom }}</div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="text-sm text-gray-900">{{ classe.annee_scolaire || anneesScolaires[0] }}</div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="flex items-center">
+                <span class="text-sm text-gray-900 mr-2">{{ classe.effectif || 0 }}/{{ classe.capacite }}</span>
+                <div class="w-24 h-2 bg-gray-200 rounded-full overflow-hidden">
+                  <div 
+                    class="h-full rounded-full" 
+                    [style.width.%]="getOccupationPercentage(classe)"
+                    [ngClass]="{
+                      'bg-green-500': getOccupationPercentage(classe) < 80,
+                      'bg-yellow-500': getOccupationPercentage(classe) >= 80 && getOccupationPercentage(classe) < 90,
+                      'bg-red-500': getOccupationPercentage(classe) >= 90
+                    }"
+                  ></div>
+                </div>
+              </div>
+            </td>
+            
+            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+              <button 
+                  (click)="showClasseDetails(classe)" 
+                  class="text-indigo-600 hover:text-indigo-900 focus:outline-none"
+                  title="Consulter">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                </button>
+                <button 
+                  (click)="openEditForm(classe)" 
+                  class="text-yellow-600 hover:text-yellow-900 focus:outline-none"
+                  title="Modifier">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 0L11.828 15H9v-2.828l8.586-8.586z" />
+                  </svg>
+                </button>
+                <button 
+                  (click)="supprimerClasse(classe.id!)" 
+                  class="text-red-600 hover:text-red-900 focus:outline-none"
+                  title="Supprimer">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Pagination (simplifiée) -->
+  <div *ngIf="classes.length > 0" class="flex justify-between items-center bg-white p-4 rounded-lg shadow-sm">
+    <div class="text-sm text-gray-700">
+      Affichage de <span class="font-medium">{{ filteredClasses.length }}</span> classes sur <span class="font-medium">{{ classes.length }}</span>
+    </div>
+    <div class="flex gap-2">
+      <button class="px-3 py-1 border border-gray-300 rounded-md text-sm disabled:opacity-50" disabled>
+        Précédent
+      </button>
+      <button class="px-3 py-1 border border-gray-300 rounded-md text-sm disabled:opacity-50" disabled>
+        Suivant
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de détails de classe -->
+<app-classe-details 
+  *ngIf="showDetails && selectedClasse" 
+  [classe]="selectedClasse"
+  (close)="closeDetails()"
+></app-classe-details>
+
+<!-- Modal d'ajout/modification de classe -->
+<div 
   *ngIf="isAddFormOpen" 
   class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
 >
-  
-    <!-- Modal d'ajout/modification de classe -->
   <app-classe-form
-  *ngIf="showAddForm"
-  [classe]="selectedClasse"
-  [isEditing]="isEditing"
-  [anneesScolaires]="anneesScolaires"
-  (close)="closeAddForm()"
-  (save)="ajouterClasse()"
-></app-classe-form>
+    *ngIf="showAddForm"
+    [classe]="selectedClasse"
+    [isEditing]="isEditing"
+    [anneesScolaires]="anneesScolaires"
+    (close)="closeAddForm()"
+    (save)="ajouterClasse($event)"
+  ></app-classe-form>
 </div>

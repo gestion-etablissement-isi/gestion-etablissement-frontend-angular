@@ -19,12 +19,12 @@
                 <label for="cours" class="form-label">Cours</label>
                 <select 
                   id="cours" 
-                  [(ngModel)]="nouveauCreneau.cours" 
+                  [(ngModel)]="nouveauCreneau.cour" 
                   class="form-select"
                   required
                 >
                   <option value="" disabled selected>Sélectionner une cours</option>
-                  <option *ngFor="let c of cours" [value]="c">{{c.matiere}} - {{ c.titre }} - {{c.professeur}} - {{c.classe}} - ({{c.anneeAcademique}})</option>
+                  <option *ngFor="let c of cours" [value]="c.id">{{c.titre}}</option>
                 </select>
               </div>
               
@@ -67,13 +67,13 @@
                   <input 
                     type="date" 
                     [id]="'date-' + i" 
-                    [(ngModel)]="desc.date" 
+                    [(ngModel)]="desc.dateCours" 
                     class="form-input"
                     required
                   >
                 </div>
                 <!-- Salle -->
-              <div class="form-group">
+              <!-- <div class="form-group">
                 <label for="salle" class="form-label">Salle</label>
                 <select 
                   id="salle" 
@@ -84,7 +84,7 @@
                   <option value="" disabled selected>Sélectionner une salle</option>
                   <option *ngFor="let salle of salles" [value]="salle">{{ salle }}</option>
                 </select>
-              </div>
+              </div> -->
                 
                 
                 

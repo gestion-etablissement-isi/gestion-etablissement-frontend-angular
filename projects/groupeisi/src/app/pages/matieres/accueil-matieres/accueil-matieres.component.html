@@ -1,123 +1,137 @@
 <div class="space-y-6 w-full">
-    <!-- En-tête avec titre et bouton d'ajout -->
-    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-      <div>
-        <h1 class="text-2xl font-bold text-gray-800">Gestion des Matieres</h1>
-        <p class="text-gray-600">Gérez la liste des Matieres, ajoutez ou modifiez leurs informations.</p>
-      </div>
-      <button 
-        (click)="openAddForm()" 
-        class="btn-primary flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark transition-colors">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-          <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
-        </svg>
-        <span>Ajouter une matiere</span>
-      </button>
+  <!-- En-tête avec titre et bouton d'ajout -->
+  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-800">Gestion des Matières</h1>
+      <p class="text-gray-600">Gérez la liste des matières, ajoutez ou modifiez leurs informations.</p>
     </div>
-  
-    <!-- Filtres et recherche -->
-    <div class="bg-white rounded-lg shadow-sm p-4">
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <!-- Barre de recherche -->
-        <div class="md:col-span-4">
-          <div class="relative">
-            <input 
-              type="text" 
-              [(ngModel)]="searchTerm"
-              (input)="onSearch()"
-              placeholder="Rechercher un matiere..." 
-              class="w-full px-4 py-2 border border-gray-300 rounded-md pl-10 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
-            >
-            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-            </div>
+    <button 
+      (click)="openAddForm()" 
+      class="btn-primary flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark transition-colors">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
+      </svg>
+      <span>Ajouter une matière</span>
+    </button>
+  </div>
+
+  <!-- Filtres et recherche -->
+  <div class="bg-white rounded-lg shadow-sm p-4">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <!-- Barre de recherche -->
+      <div class="md:col-span-4">
+        <div class="relative">
+          <input 
+            type="text" 
+            [(ngModel)]="searchTerm"
+            (input)="onSearch()"
+            placeholder="Rechercher une matière..." 
+            class="w-full px-4 py-2 border border-gray-300 rounded-md pl-10 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
+          >
+          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
           </div>
         </div>
-  
-        
-  
-        
-  
-        <div class="flex items-end">
-          <button 
-            (click)="resetFilters()" 
-            class="w-full px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
-          >
-            Réinitialiser les filtres
-          </button>
-        </div>
       </div>
-    </div>
-  
-    <!-- Tableau des Matieres -->
-    <div class="bg-white rounded-lg shadow-sm overflow-hidden">
-      <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200">
-          <thead class="bg-gray-50">
-            <tr>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Libelle</th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Statut</th>
-              <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-            </tr>
-          </thead>
-          <tbody class="bg-white divide-y divide-gray-200">
-            <tr *ngIf="filteredMatieres.length === 0">
-              <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">
-                Aucun matiere trouvé
-              </td>
-            </tr>
-            <tr *ngFor="let matiere of filteredMatieres" class="hover:bg-gray-50 transition-colors">
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="flex items-center">
-                  <div class="flex-shrink-0 h-10 w-10 bg-accent text-white rounded-full flex items-center justify-center">
-                    {{ matiere.libelle.charAt(0) }}
-                  </div>
-                  <div class="ml-4">
-                    <div class="text-sm font-medium text-gray-900">{{ matiere.libelle }}</div>
-                  </div>
-                </div>
-              </td>
-              
-              
-              <td class="px-6 py-4 whitespace-nowrap">
-                <span 
-                  class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full" 
-                  [ngClass]="matiere.statut === 'Actif' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
-                >
-                  {{ matiere.statut }}
-                </span>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  
-    <!-- Pagination (simplifiée) -->
-    <div class="flex justify-between items-center bg-white p-4 rounded-lg shadow-sm">
-      <div class="text-sm text-gray-700">
-        Affichage de <span class="font-medium">{{ filteredMatieres.length }}</span> Matieres sur <span class="font-medium">{{ matieres.length }}</span>
-      </div>
-      <div class="flex gap-2">
-        <button class="px-3 py-1 border border-gray-300 rounded-md text-sm disabled:opacity-50" disabled>
-          Précédent
-        </button>
-        <button class="px-3 py-1 border border-gray-300 rounded-md text-sm disabled:opacity-50" disabled>
-          Suivant
+
+      <div class="flex items-end">
+        <button 
+          (click)="resetFilters()" 
+          class="w-full px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
+        >
+          Réinitialiser les filtres
         </button>
       </div>
     </div>
   </div>
-  
-  
-  <!-- Modal d'ajout d'matiere -->
-  <app-matiere-form
-    *ngIf="showAddForm"
-    (close)="closeAddForm()"
-    (save)="ajouterMatiere()"
-  ></app-matiere-form>
+
+  <!-- Tableau des Matières -->
+  <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Libellé</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Statut</th>
+            <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          <tr *ngIf="filteredMatieres.length === 0">
+            <td colspan="3" class="px-6 py-4 text-center text-sm text-gray-500">
+              Aucune matière trouvée
+            </td>
+          </tr>
+          <tr *ngFor="let matiere of filteredMatieres" class="hover:bg-gray-50 transition-colors">
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="flex items-center">
+                <div class="flex-shrink-0 h-10 w-10 bg-accent text-white rounded-full flex items-center justify-center">
+                  {{ matiere.libelle.charAt(0) }}
+                </div>
+                <div class="ml-4">
+                  <div class="text-sm font-medium text-gray-900">{{ matiere.libelle }}</div>
+                </div>
+              </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span 
+                class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full" 
+                [ngClass]="matiere.statut.toLowerCase() === 'actif' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
+              >
+                {{ matiere.statut }}
+              </span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+              <div class="flex justify-end gap-2">
+                
+                <button 
+                  (click)="modifierMatiere(matiere)" 
+                  class="text-yellow-600 hover:text-yellow-900 focus:outline-none"
+                  title="Modifier">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 0L11.828 15H9v-2.828l8.586-8.586z" />
+                  </svg>
+                </button>
+                <button 
+                  (click)="supprimerMatiere(matiere.id)" 
+                  class="text-red-600 hover:text-red-900 focus:outline-none"
+                  title="Supprimer">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Pagination (simplifiée) -->
+  <div class="flex justify-between items-center bg-white p-4 rounded-lg shadow-sm">
+    <div class="text-sm text-gray-700">
+      Affichage de <span class="font-medium">{{ filteredMatieres.length }}</span> matières sur <span class="font-medium">{{ matieres.length }}</span>
+    </div>
+    <div class="flex gap-2">
+      <button class="px-3 py-1 border border-gray-300 rounded-md text-sm disabled:opacity-50" disabled>
+        Précédent
+      </button>
+      <button class="px-3 py-1 border border-gray-300 rounded-md text-sm disabled:opacity-50" disabled>
+        Suivant
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal d'ajout ou de modification de matière -->
+<app-matiere-form
+  *ngIf="showAddForm"
+  [isEditing]="isEditing"
+  (close)="closeAddForm()"
+  (save)="selectedMatiere ? updateMatiere() : ajouterMatiere()"
+></app-matiere-form>
+
+

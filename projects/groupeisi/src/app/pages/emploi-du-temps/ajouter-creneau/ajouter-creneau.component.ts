@@ -1,98 +1,58 @@
 import { Component, EventEmitter, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-
-interface Cours {
-  id: number;
-  titre: string;
-  professeur: string;
-  classe: string;
-  matiere: string;
-  volumeHoraire: number;
-  coefficient: number;
-  anneeAcademique: string;
-  statut: string;
-}
-
-interface Creneau {
-  id: number;
-  cours: Cours;
-  descriptions: CreneauDescription[];
-  couleur: string;
-}
-
-interface CreneauDescription {
-  date: string;
-  salle: string;
-  description: string;
-  heureDebut: string;
-  heureFin: string;
-}
+import { ICours } from '../../../interfaces/cours.interface';
+import { IDescription } from '../../../interfaces/description.interface';
+import { ICreneau } from '../../../interfaces/creneau.interface';
+import { CoursService } from '../../../services/cours/cours.service';
 
 @Component({
-    selector: 'app-ajouter-creneau',
-    imports: [CommonModule, FormsModule],
-    templateUrl: './ajouter-creneau.component.html',
-    styleUrl: './ajouter-creneau.component.css'
+  selector: 'app-ajouter-creneau',
+  imports: [CommonModule, FormsModule],
+  templateUrl: './ajouter-creneau.component.html',
+  styleUrl: './ajouter-creneau.component.css'
 })
 export class AjouterCreneauComponent {
   @Output() close = new EventEmitter<void>();
-  @Output() creneauAjoute = new EventEmitter<Creneau>();
+  @Output() creneauAjoute = new EventEmitter<ICreneau>();
 
   salles: string[] = ['A101', 'A102', 'B201', 'B202', 'C103', 'C104', 'D105'];
-  cours = [
-    {
-      id: 1,
-      titre: "Algèbre Linéaire",
-      professeur: "M. Diallo",
-      classe: "Licence 1 GL",
-      matiere: "Mathématiques",
-      volumeHoraire: 30,
-      coefficient: 4,
-      anneeAcademique: "2024-2025",
-      statut: 'Actif'
-    },
-    {
-      id: 2,
-      titre: "Programmation Orientée Objet",
-      professeur: "Mme Ndiaye",
-      classe: "Licence 2 GL",
-      matiere: "Informatique",
-      volumeHoraire: 40,
-      coefficient: 5,
-      anneeAcademique: "2024-2025",
-      statut: 'Inactif'
-    },
-    {
-      id: 3,
-      titre: "Réseaux et Protocoles",
-      professeur: "M. Sow",
-      classe: "Licence 3 GL",
-      matiere: "Systèmes Réseaux",
-      volumeHoraire: 35,
-      coefficient: 3,
-      anneeAcademique: "2024-2025",
-      statut: 'Actif'
-    }
-  ];
-  
+  cours: ICours[] = [];
+
   joursSemaine: string[] = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
 
-  
   // Données du formulaire
   nouveauCreneau = {
-    id: 0,
-    cours: this.cours[0],
-    descriptions: [this.creerDescriptionVide()]
+    cour: '',
+    descriptions: [this.creerDescriptionVide()],
   };
 
-  // Couleurs pour les creneau
-  couleurs: string[] = ['#4A77B4', '#6C5CE7', '#00B894', '#FF7675', '#FDCB6E', '#E84393', '#00CEC9'];
 
-  creerDescriptionVide(): CreneauDescription {
+
+  constructor(
+    private coursService: CoursService
+  ) {
+    this.getCours();
+  }
+
+  getCours(): void {
+    this.coursService.getAllCours().subscribe(
+      (data) => {
+        this.cours = data;
+        // Si des cours sont disponibles, initialise le premier cours
+        if (this.cours.length > 0) {
+          this.nouveauCreneau.cour = this.cours[0].id || '';
+        }
+      },
+      (error) => {
+        console.error('Erreur lors de la récupération des cours', error);
+      }
+    );
+  }
+
+  creerDescriptionVide(): IDescription {
     return {
-      date: '',
-      salle: '',
+      dateCours: new Date(0),
       description: '',
       heureDebut: '',
       heureFin: '',
@@ -114,24 +74,22 @@ export class AjouterCreneauComponent {
   }
 
   soumettre() {
-    // Générer un ID unique
+    // Générer un ID unique pour chaque créneau
     const id = Date.now();
-    
-    // Choisir une couleur aléatoire
-    const couleur = this.couleurs[Math.floor(Math.random() * this.couleurs.length)];
-    
-    // Créer un creneau pour chaque description
+
+    // Créer un créneau pour chaque description
     this.nouveauCreneau.descriptions.forEach(desc => {
-      const nouveauCreneau: Creneau = {
-        id: id,
-        cours: this.nouveauCreneau.cours,
+      const nouveauCreneau: ICreneau = {
+        id: id.toString(),  // Utilisation de l'ID unique généré
+        coursId: this.nouveauCreneau.cour,
         descriptions: [desc],
-        couleur: couleur
       };
-      
+
+      // Emission de l'événement avec le créneau ajouté
       this.creneauAjoute.emit(nouveauCreneau);
+      window.location.reload();
     });
-    
+
     this.fermer();
   }
 }

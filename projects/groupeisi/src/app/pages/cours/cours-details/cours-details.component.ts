@@ -9,9 +9,9 @@ import { ICours } from '../../../interfaces/cours.interface';
 })
 export class CoursDetailsComponent {
   @Input() cours: ICours | null = null;
-  @Output() getProfesseur = new EventEmitter<string>();
-  @Output() getClasse = new EventEmitter<string>();
-  @Output() getMatiere = new EventEmitter<string>();
+  @Input() professeur: string | null = null ;
+  @Input() classe: string | null = null ;
+  @Input() matiere: string | null = null ;
   @Output() close = new EventEmitter<void>();
 
   onClose() {

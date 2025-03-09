@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IMatiere } from '../../../interfaces/matiere.interface';
@@ -19,59 +19,92 @@ interface Cours {
   couleur: string;
 }
 
-
 @Component({
     selector: 'app-cours-form',
     imports: [CommonModule, FormsModule],
     templateUrl: './cours-form.component.html',
     styleUrl: './cours-form.component.css'
 })
-export class CoursFormComponent {
+export class CoursFormComponent implements OnInit {
   @Output() close = new EventEmitter<void>();
   @Output() coursAjoute = new EventEmitter<ICours>();
-  @Output() getProfesseur = new EventEmitter<string>();
-  @Output() getClasse = new EventEmitter<string>();
-  @Output() getMatiere = new EventEmitter<string>();
+  @Input() professeur: string | null = null;
+  @Input() classe: string | null = null;
+  @Input() matiere: string | null = null;
   @Input() matieres: IMatiere[] = [];
   @Input() professeurs: IProfesseur[] = [];
   @Input() classes: IClasse[] = [];
-
+  @Input() isEditing: Boolean = false;
+  @Input() set cours(value: any) {
+    if (value) {
+      this.nouveauCours = { ...value };
+    }
+  }
   
   joursSemaine: string[] = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
 
-  
-
   // Données du formulaire
-  nouveauCours = {
+  nouveauCours: ICours = {
     titre: '',
-    matiere: '',
-    professeur: '',
-    salle: '',
-    classe: '',
+    matiereId: '',
+    professeurId: '',
+    classeId: '',
     volumeHoraire: 0,
     coefficient: 0,
     anneeAcademique: '',
-    statut: '',
   };
+
+  ngOnInit(): void {
+    
+    if (this.isEditing && this.nouveauCours) {
+      // Important: Assurez-vous que ces affectations sont faites après que nouveauCours soit initialisé
+      this.matiere = this.nouveauCours.matiereId;
+      this.professeur = this.nouveauCours.professeurId;
+      this.classe = this.nouveauCours.classeId;
+      
+      
+    }
+  }
 
   // Couleurs pour les cours
   couleurs: string[] = ['#4A77B4', '#6C5CE7', '#00B894', '#FF7675', '#FDCB6E', '#E84393', '#00CEC9'];
-
   
+  getMatiere(matiereId: string | null): IMatiere | null {
+    if (!matiereId) return null;
+    
+    const matiere = this.matieres.find(m => m.id === matiereId);
+    return matiere ? matiere : null;
+  }
 
+  getClasse(classeId: string | null): string {
+    if (!classeId) return 'Non assigné';
+    
+    const classe = this.classes.find(c => c.id === classeId);
+    return classe ? classe.nom: 'Classe introuvable';
+  }
+
+  getProfesseur(professeurId: string | null): string {
+    if (!professeurId) return 'Non assigné';
+    
+    const professeur = this.professeurs.find(p => p.id === professeurId);
+    return professeur ? professeur.prenom + " " + professeur.nom : 'Professeur introuvable';
+  }
+  
   fermer() {
     this.close.emit();
   }
 
   soumettre() {
-    // Générer un ID unique
-    const id = Date.now();
+    // Créer un objet cours avec les valeurs de référence correctes
+    const coursToSubmit: ICours = {
+      ...this.nouveauCours,
+      matiereId: this.matiere || '',
+      professeurId: this.professeur || '',
+      classeId: this.classe || ''
+    };
     
-    // Choisir une couleur aléatoire
-    const couleur = this.couleurs[Math.floor(Math.random() * this.couleurs.length)];
-    
-    
-    
+    // Émettre l'événement avec le cours complet
+    this.coursAjoute.emit(coursToSubmit);
     this.fermer();
   }
 }

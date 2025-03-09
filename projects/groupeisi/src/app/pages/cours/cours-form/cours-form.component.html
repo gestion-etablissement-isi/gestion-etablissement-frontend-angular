@@ -1,7 +1,7 @@
 <div class="modal-backdrop" (click)="fermer()">
   <div class="modal-content" (click)="$event.stopPropagation()">
     <div class="modal-header" [style.border-bottom-color]="'var(--color-accent)'">
-      <h2 class="text-xl font-bold text-gray-800">Ajouter un nouveau cours</h2>
+      <h2 class="text-xl font-bold text-gray-800">{{isEditing ? "Modifier un cours" : "Ajouter un nouveau cours"}}</h2>
       <button (click)="fermer()" class="modal-close">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -60,6 +60,7 @@
                 class="form-select" 
                 required
               >
+                <option value="" disabled>Sélectionner une année</option>
                 <option value="2024-2025">2024-2025</option>
               </select>
             </div>
@@ -69,12 +70,12 @@
               <label for="matiere" class="form-label">Matière</label>
               <select 
                 id="matiere" 
-                [(ngModel)]="nouveauCours.matiere" 
+                [(ngModel)]="matiere" 
                 class="form-select" 
                 required
               >
-                <option value="" disabled selected>Sélectionner une matière</option>
-                <option *ngFor="let matiere of matieres" [value]="matiere.id">{{ getMatiere.emit(matiere.id) }}</option>
+                <option value="" disabled>Sélectionner une matière</option>
+                <option *ngFor="let matiere of matieres" [value]="matiere.id">{{ matiere.libelle }}</option>
               </select>
             </div>
 
@@ -83,28 +84,26 @@
               <label for="professeur" class="form-label">Professeur</label>
               <select 
                 id="professeur" 
-                [(ngModel)]="nouveauCours.professeur" 
+                [(ngModel)]="professeur" 
                 class="form-select" 
                 required
               >
-                <option value="" disabled selected>Sélectionner un professeur</option>
-                <option *ngFor="let prof of professeurs" [value]="prof.id">{{ getProfesseur.emit(prof.id) }}</option>
+                <option value="" disabled>Sélectionner un professeur</option>
+                <option *ngFor="let prof of professeurs" [value]="prof.id">{{ prof.prenom }} {{ prof.nom }}</option>
               </select>
             </div>
-
-            
 
             <!-- Classe -->
             <div class="form-group">
               <label for="classe" class="form-label">Classe</label>
               <select 
                 id="classe" 
-                [(ngModel)]="nouveauCours.classe" 
+                [(ngModel)]="classe" 
                 class="form-select" 
                 required
               >
-                <option value="" disabled selected>Sélectionner une classe</option>
-                <option *ngFor="let classe of classes" [value]="classe.id">{{ getClasse.emit(classe.id) }}</option>
+                <option value="" disabled>Sélectionner une classe</option>
+                <option *ngFor="let classe of classes" [value]="classe.id">{{ classe.nom }}</option>
               </select>
             </div>
           </div>
@@ -118,7 +117,7 @@
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
         </svg>
-        Ajouter le cours
+        {{isEditing ? "Modifier le cours" : "Ajouter le cours"}}
       </button>
     </div>
   </div>

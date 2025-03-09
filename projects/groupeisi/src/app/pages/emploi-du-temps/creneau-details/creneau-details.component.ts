@@ -1,32 +1,12 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ICreneau } from '../../../interfaces/creneau.interface';
+import { ICours } from '../../../interfaces/cours.interface';
+import { Observable } from 'rxjs';
 
-interface Cours {
-  id: number;
-  titre: string;
-  professeur: string;
-  classe: string;
-  matiere: string;
-  volumeHoraire: number;
-  coefficient: number;
-  anneeAcademique: string;
-  statut: string;
-}
 
-interface Creneau {
-  id: number;
-  cours: Cours;
-  descriptions: CreneauDescription[];
-  couleur: string;
-}
 
-interface CreneauDescription {
-  date: string;
-  salle: string;
-  description: string;
-  heureDebut: string;
-  heureFin: string;
-}
+
 
 @Component({
     selector: 'app-creneau-details',
@@ -35,9 +15,14 @@ interface CreneauDescription {
     styleUrl: './creneau-details.component.css'
 })
 export class CreneauDetailsComponent {
-  @Input() creneau: Creneau | null = null;
+  @Input() creneau: ICreneau | null = null;
+  @Input() cours: string | null = null;
+  @Input() classe: string | null = null;
+  @Input() matiere: string | null = null;
+  @Input() professeur: string | null = null;
+  @Input() infosCours: ICours | any;
   @Output() close = new EventEmitter<void>();
-  @Output() modify = new EventEmitter<Creneau>();
+  @Output() modify = new EventEmitter<ICreneau>();
 
   onBackdropClick(event: MouseEvent): void {
     // Fermer le modal uniquement si l'utilisateur clique sur l'arrière-plan
@@ -60,6 +45,11 @@ export class CreneauDetailsComponent {
     // Logique pour déterminer si l'utilisateur peut modifier ce créneau
     // À adapter selon votre système d'autorisations
     return true;
+  }
+
+  getRandomColor(): string {
+    const colors = ['yellow', 'purple', 'darkblue', 'green', 'red', 'orange', 'pink', 'teal', 'brown']; // Ajout de plusieurs couleurs
+    return colors[Math.floor(Math.random() * colors.length)];
   }
 
   modifierCreneau(): void {

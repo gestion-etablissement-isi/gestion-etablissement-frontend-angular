@@ -1,7 +1,7 @@
 export interface IClasse {
     id?: string,
     nom: string,
-    anneeScolaire: string,
+    annee_scolaire: string,
     capacite: number,
     effectif?: number,
 }

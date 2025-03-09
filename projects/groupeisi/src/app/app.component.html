@@ -1,1 +1,17 @@
-<router-outlet></router-outlet>
+<!-- <div>
+    <header>
+      <nav>
+        <div *ngIf="isLoggedIn; else loginButton">
+          <span *ngIf="userProfile">Bienvenue, {{ userProfile.firstName }}</span>
+          <button (click)="logout()">Déconnexion</button>
+        </div>
+        <ng-template #loginButton>
+          <button (click)="login()">Connexion</button>
+        </ng-template>
+      </nav>
+    </header>
+  
+    <main> -->
+      <router-outlet></router-outlet>
+    <!-- </main>
+  </div> -->

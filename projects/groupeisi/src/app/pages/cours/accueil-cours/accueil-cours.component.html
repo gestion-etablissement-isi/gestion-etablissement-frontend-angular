@@ -46,7 +46,7 @@
             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
           >
             <option value="">Toutes les matieres</option>
-            <option *ngFor="let matiere of matieres" [value]="matiere">{{ matiere }}</option>
+            <option *ngFor="let matiere of matieres" [value]="matiere.id">{{ matiere.libelle }}</option>
           </select>
         </div>
         <div>
@@ -58,7 +58,7 @@
             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
           >
             <option value="">Tous les professeurs</option>
-            <option *ngFor="let prof of professeurs" [value]="prof">{{ prof }}</option>
+            <option *ngFor="let prof of professeurs" [value]="prof.id">{{ prof.prenom }} {{ prof.nom }}</option>
           </select>
         </div>
         <div>
@@ -70,7 +70,7 @@
             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
           >
             <option value="">Tous les classes</option>
-            <option *ngFor="let cl of classes" [value]="cl">{{ cl }}</option>
+            <option *ngFor="let cl of classes" [value]="cl.id">{{ cl.nom }}</option>
           </select>
         </div>
         <div>
@@ -102,72 +102,87 @@
     </div>
   
     <!-- Tableau des cours -->
-    <div class="bg-white rounded-lg shadow-sm overflow-hidden">
-      <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200">
-          <thead class="bg-gray-50">
-            <tr>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Titre</th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Matiere</th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Professeur</th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Classe</th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Volume Horaire</th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Coefficient</th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Année académique</th>
-              <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-            </tr>
-          </thead>
-          <tbody class="bg-white divide-y divide-gray-200">
-            <tr *ngIf="filteredCours.length === 0">
-              <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">
-                Aucun cours trouvé
-              </td>
-            </tr>
-            <tr *ngFor="let cours of filteredCours" class="hover:bg-gray-50 transition-colors">
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="flex items-center">
-                  <div class="flex-shrink-0 h-10 w-10 bg-accent text-white rounded-full flex items-center justify-center">
-                    {{ cours.titre.charAt(0) }}
-                  </div>
-                  <div class="ml-3 text-sm text-gray-900">{{ cours.titre }}</div>
-                </div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-900">{{ getMatiere(cours.matiereId) }}</div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-900">{{ getProfesseur(cours.professeurId) }}</div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-900">{{ getClasse(cours.classeId) }}</div>
-              </td>
-              
-              
-              
-              
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-900">{{ cours.volumeHoraire }}</div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-900">{{ cours.coefficient }}</div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-900">{{ cours.anneeAcademique }}</div>
-              </td>
-              
-              <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                <button 
+<div class="bg-white rounded-lg shadow-sm overflow-hidden">
+  <div class="overflow-x-auto">
+    <table class="min-w-full divide-y divide-gray-200">
+      <thead class="bg-gray-50">
+        <tr>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Titre</th>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Matière</th>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Professeur</th>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Classe</th>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Volume Horaire</th>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Coefficient</th>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Année académique</th>
+          <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+        </tr>
+      </thead>
+      <tbody class="bg-white divide-y divide-gray-200">
+        <tr *ngIf="filteredCours.length === 0">
+          <td colspan="8" class="px-6 py-4 text-center text-sm text-gray-500">
+            Aucun cours trouvé
+          </td>
+        </tr>
+        <tr *ngFor="let cours of filteredCours" class="hover:bg-gray-50 transition-colors">
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="flex items-center">
+              <div class="flex-shrink-0 h-10 w-10 bg-accent text-white rounded-full flex items-center justify-center">
+                {{ cours.titre.charAt(0) }}
+              </div>
+              <div class="ml-3 text-sm text-gray-900">{{ cours.titre }}</div>
+            </div>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="text-sm text-gray-900">{{ getMatiere(cours.matiereId) }}</div>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="text-sm text-gray-900">{{ getProfesseur(cours.professeurId) }}</div>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="text-sm text-gray-900">{{ getClasse(cours.classeId)  }}</div>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="text-sm text-gray-900">{{ cours.volumeHoraire }}</div>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="text-sm text-gray-900">{{ cours.coefficient }}</div>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="text-sm text-gray-900">{{ cours.anneeAcademique }}</div>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+            <button 
                   (click)="showCoursDetails(cours)" 
-                  class="text-accent hover:text-primary-dark transition-colors mr-3"
-                >
-                  Détails
+                  class="text-indigo-600 hover:text-indigo-900 focus:outline-none"
+                  title="Consulter">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+            </button>
+            <button 
+                  (click)="openEditForm(cours)" 
+                  class="text-yellow-600 hover:text-yellow-900 focus:outline-none"
+                  title="Modifier">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 0L11.828 15H9v-2.828l8.586-8.586z" />
+                  </svg>
                 </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
+            <button 
+                  (click)="supprimerCours(cours.id!)" 
+                  class="text-red-600 hover:text-red-900 focus:outline-none"
+                  title="Supprimer">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+            </button>
+            
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
   
     <!-- Pagination (simplifiée) -->
     <div class="flex justify-between items-center bg-white p-4 rounded-lg shadow-sm">
@@ -189,9 +204,10 @@
   <app-cours-details 
     *ngIf="showDetails && selectedCour" 
     [cours]="selectedCour"
-    (getProfesseur)="getProfesseur($event)"
-    (getClasse)="getClasse($event)"
-    (getMatiere)="getMatiere($event)"
+    [classe]="getClasse(selectedCour.classeId)"
+    [matiere]="getMatiere(selectedCour.matiereId)"
+    [professeur]="getProfesseur(selectedCour.professeurId)"
+    
     (close)="closeDetails()"
   ></app-cours-details>
   
@@ -199,12 +215,15 @@
   <app-cours-form
     *ngIf="showAddForm"
     (close)="fermerModalAjouterCours()"
+    [isEditing]="isEditing" 
+    [cours]="selectedCour"
     [classes]="classes"
     [professeurs]="professeurs"
     [matieres]="matieres"
-    (getProfesseur)="getProfesseur($event)"
-    (getClasse)="getClasse($event)"
-    (getMatiere)="getMatiere($event)"
+    [classe]="selectedCour!.classeId"
+    [matiere]="selectedCour!.matiereId"
+    [professeur]="selectedCour!.professeurId"
+
     (coursAjoute)="ajouterCours()"
   ></app-cours-form>
 

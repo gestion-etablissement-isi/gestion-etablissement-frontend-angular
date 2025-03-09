@@ -9,13 +9,15 @@ import { IProfesseur } from '../../../interfaces/professeur.interface';
     styleUrl: './professeur-details.component.css'
 })
 export class ProfesseurDetailsComponent {
-  @Input() professeur: IProfesseur| null = null;
-  @Output() getMatiere = new EventEmitter<string>();
+  @Input() professeur: IProfesseur = {email: '', matiereId: '', nom: '', prenom: '', statut: ''};
+  @Input() matiere: string = '';
   @Output() close = new EventEmitter<void>();
 
   onClose() {
     this.close.emit();
   }
+
+  
 
   formatDate(dateString: string): string {
     const date = new Date(dateString);

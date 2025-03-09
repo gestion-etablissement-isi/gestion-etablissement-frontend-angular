@@ -10,10 +10,12 @@ import { ProfesseurService } from '../../../services/professeur/professeur.servi
 import { IMatiere } from '../../../interfaces/matiere.interface';
 import { IProfesseur } from '../../../interfaces/professeur.interface';
 import { IClasse } from '../../../interfaces/classe.interface';
-import { ClasseService } from '../../../services/classe.service';
+import { ClasseService } from '../../../services/classe/classe.service';
 import { Observable, map } from 'rxjs';
+
 @Component({
   selector: 'app-accueil-cours',
+  standalone: true,
   imports: [
     CommonModule,
     FormsModule,
@@ -23,7 +25,7 @@ import { Observable, map } from 'rxjs';
   templateUrl: './accueil-cours.component.html',
   styleUrl: './accueil-cours.component.css',
 })
-export class AccueilCoursComponent {
+export class AccueilCoursComponent implements OnInit {
   cours: ICours[] = [];
   mesCours: ICours = {titre: '', volumeHoraire: 0, coefficient: 0, anneeAcademique: '', matiereId: '', professeurId: '', classeId: '' };
   filteredCours: ICours[] = [];
@@ -32,6 +34,8 @@ export class AccueilCoursComponent {
   searchTerm: string = '';
   showAddForm: boolean = false;
   showDetails: boolean = false;
+  isEditing: boolean = false;
+  isAddFormOpen: boolean = false;
 
   // Filtres
   filtreMatiere: string = '';
@@ -47,14 +51,6 @@ export class AccueilCoursComponent {
 
   anneeAcademiques: string[] = ['2024-2025', '2025-2026', '2026-2027']; // Par exemple
 
-  ngOnInit() {
-    // Simuler le chargement des données depuis une API
-    this.loadMatiere();
-    this.loadProfesseur();
-    this.loadClasse();
-    this.getCours();
-  }
-
   constructor(
     private matiereService: MatiereService,
     private professeurService: ProfesseurService,
@@ -62,36 +58,27 @@ export class AccueilCoursComponent {
     private coursService: CoursService
   ) {}
 
+  ngOnInit() {
+    this.loadMatiere();
+    this.loadProfesseur();
+    this.loadClasse();
+    this.getCours();
+    // Définir une année académique par défaut
+    this.mesCours.anneeAcademique = this.anneeAcademiques[0];
+  }
+
   loadMatiere() {
     this.matiereService.getAllMatieres().subscribe(
       (data) => {
         this.matieres = data;
       },
       (error) => {
-        console.error('Erreur lors de la récupération des matieres', error);
+        console.error('Erreur lors de la récupération des matières', error);
       }
     );
   }
 
-  getMatiere(matiereId: string): Observable<string> {
-    return this.matiereService.consulterMatiere(matiereId).pipe(
-      map((matiere) => matiere ? matiere.libelle : 'Matière introuvable')
-    );
-  }
-
-  getClasse(classeId: string): Observable<string> {
-    return this.classeService.consulterClasse(classeId).pipe(
-      map((cl) => cl ? cl.nom : 'Classe introuvable')
-    );
-  }
-
-  getProfesseur(professeurId: string): Observable<string> {
-    return this.professeurService.consulterProfesseur(professeurId).pipe(
-      map((cl) => cl ? cl.prenom + " " + cl.nom : 'Professeur introuvable')
-    );
-  }
-  
-
+  // Charger les professeurs
   loadProfesseur() {
     this.professeurService.getAllProfesseurs().subscribe(
       (data) => {
@@ -103,6 +90,7 @@ export class AccueilCoursComponent {
     );
   }
 
+  // Charger les classes
   loadClasse() {
     this.classeService.getAllClasses().subscribe(
       (data) => {
@@ -114,16 +102,115 @@ export class AccueilCoursComponent {
     );
   }
 
-  // Méthode pour récupérer tous les cours
+  // Récupérer tous les cours
   getCours(): void {
     this.coursService.getAllCours().subscribe(
       (data) => {
         this.cours = data;
+        this.filteredCours = [...data]; // Initialiser filteredCours avec tous les cours
+        this.applyFilters(); // Appliquer les filtres par défaut
       },
       (error) => {
-        console.error('Erreur lors de la récupération des professeurs', error);
+        console.error('Erreur lors de la récupération des cours', error);
       }
     );
+  }
+
+  // Méthode pour ajouter ou mettre à jour un cours
+  ajouterCours(): void {
+    if (this.isEditing && this.selectedCour) {
+      // S'assurer que l'année académique est définie
+      if (!this.selectedCour.anneeAcademique || this.selectedCour.anneeAcademique === '') {
+        this.selectedCour.anneeAcademique = this.anneeAcademiques[0];
+      }
+      
+      // Mise à jour d'un cours existant
+      this.coursService.updateCours(this.selectedCour).subscribe(
+        (data) => {
+          const index = this.cours.findIndex((c) => c.id === data.id);
+          if (index !== -1) {
+            this.cours[index] = data;
+            this.filteredCours = [...this.cours];
+            this.applyFilters();
+          }
+          this.closeAddForm();
+          console.log('Cours mis à jour avec succès', data);
+        },
+        (error) => {
+          console.error('Erreur lors de la mise à jour du cours', error);
+        }
+      );
+    } else {
+      // S'assurer que l'année académique est définie
+      if (!this.mesCours.anneeAcademique || this.mesCours.anneeAcademique === '') {
+        this.mesCours.anneeAcademique = this.anneeAcademiques[0];
+      }
+      
+      // Ajout d'un nouveau cours
+      this.coursService.ajouterCours(this.mesCours).subscribe(
+        (data) => {
+          this.cours.push(data);
+          this.filteredCours = [...this.cours];
+          this.applyFilters();
+          this.closeAddForm();
+          console.log('Cours ajouté avec succès', data);
+        },
+        (error) => {
+          console.error("Erreur lors de l'ajout du cours", error);
+        }
+      );
+    }
+  }
+
+  // Méthode pour supprimer un cours
+  supprimerCours(id: string): void {
+    if (confirm(`Êtes-vous sûr de vouloir supprimer le cours ?`)) {
+      this.coursService.supprimerCours(id).subscribe(
+        () => {
+          this.cours = this.cours.filter((cours) => cours.id !== id);
+          this.filteredCours = this.filteredCours.filter((cours) => cours.id !== id);
+          console.log('Cours supprimé avec succès');
+        },
+        (error) => {
+          console.error('Erreur lors de la suppression du cours', error);
+        }
+      );
+    }
+  }
+
+  // Méthode pour consulter les détails d'un cours
+  consulterCours(id: string): void {
+    this.coursService.consulterCours(id).subscribe(
+      (data) => {
+        this.selectedCour = data;
+        this.showDetails = true;
+        console.log('Cours consulté', data);
+      },
+      (error) => {
+        console.error('Erreur lors de la consultation du cours', error);
+      }
+    );
+  }
+
+  getMatiere(matiereId: string | null): string {
+    if (!matiereId) return 'Non assigné';
+    
+    const matiere = this.matieres.find(m => m.id === matiereId);
+    return matiere ? matiere.libelle : 'Matière introuvable';
+  }
+
+  getClasse(classeId: string | null): string {
+    if (!classeId) return 'Non assigné';
+    
+    const classe = this.classes.find(c => c.id === classeId);
+    return classe ? classe.nom: 'Classe introuvable';
+  }
+
+  getProfesseur(professeurId: string | null): string {
+    if (!professeurId) return 'Non assigné';
+    
+    const professeur = this.professeurs.find(p => p.id === professeurId);
+    return professeur ? professeur.prenom + " " + professeur.nom : 'Professeur introuvable';
   }
 
   applyFilters() {
@@ -132,39 +219,21 @@ export class AccueilCoursComponent {
       const searchMatch =
         !this.searchTerm ||
         cour.titre.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-        cour.volumeHoraire
-          .toString()
-          .toLowerCase()
-          .includes(this.searchTerm.toLowerCase()) ||
-        cour.coefficient
-          .toString()
-          .toLowerCase()
-          .includes(this.searchTerm.toLowerCase()) ||
-        cour.anneeAcademique
-          .toLowerCase()
-          .includes(this.searchTerm.toLowerCase()) ||
-        this.matiereService.consulterMatiere(cour.matiereId).forEach((matiere) => {
-          matiere.libelle.toLowerCase().includes(this.searchTerm.toLowerCase());}) ||
-        this.professeurService.consulterProfesseur(cour.professeurId).forEach((professeur) => {
-          professeur.nom.toLowerCase().includes(this.searchTerm.toLowerCase());}
-        ) ||
-        this.professeurService.consulterProfesseur(cour.professeurId).forEach((professeur) => {
-          professeur.prenom.toLowerCase().includes(this.searchTerm.toLowerCase());}
-        ) ||
-        this.classeService.consulterClasse(cour.classeId).forEach((classe) => {
-          classe.nom.toLowerCase().includes(this.searchTerm.toLowerCase());}
-        );
+        cour.volumeHoraire.toString().includes(this.searchTerm) ||
+        cour.coefficient.toString().includes(this.searchTerm) ||
+        cour.anneeAcademique.toLowerCase().includes(this.searchTerm.toLowerCase());
 
+      // Filtres spécifiques
+      const matiereMatch = !this.filtreMatiere || cour.matiereId === this.filtreMatiere;
+      const professeurMatch = !this.filtreProfesseur || cour.professeurId === this.filtreProfesseur;
+      const classeMatch = !this.filtreClasse || cour.classeId === this.filtreClasse;
+      const anneeMatch = !this.filtreAnneeAcademique || cour.anneeAcademique === this.filtreAnneeAcademique;
 
-      // Filtres par catégorie
-      const matiereMatch = !this.filtreMatiere || this.matiereService.consulterMatiere(cour.matiereId).forEach((matiere) => {matiere.libelle === this.filtreMatiere});
-      const professeurMatch = !this.filtreProfesseur || this.professeurService.consulterProfesseur(cour.professeurId).forEach((prof) => {prof.prenom + " " + prof.nom === this.filtreProfesseur });
-      const classeMatch = !this.filtreClasse || this.classeService.consulterClasse(cour.classeId).forEach((cl) => {cl.nom === this.filtreClasse } );
-
-      return searchMatch && matiereMatch && professeurMatch && classeMatch;
+      return searchMatch && matiereMatch && professeurMatch && classeMatch && anneeMatch;
     });
   }
 
+  // Recherche
   onSearch() {
     this.applyFilters();
   }
@@ -173,6 +242,8 @@ export class AccueilCoursComponent {
     this.searchTerm = '';
     this.filtreMatiere = '';
     this.filtreProfesseur = '';
+    this.filtreClasse = '';
+    this.filtreAnneeAcademique = '';
     this.applyFilters();
   }
 
@@ -188,75 +259,60 @@ export class AccueilCoursComponent {
   }
 
   openAddForm() {
+    // Réinitialiser le modèle pour un nouvel ajout avec une année académique par défaut
+    this.mesCours = {
+      titre: '', 
+      volumeHoraire: 0, 
+      coefficient: 0, 
+      anneeAcademique: this.anneeAcademiques[0], // Définir une valeur par défaut
+      matiereId: '', 
+      professeurId: '', 
+      classeId: ''
+    };
     this.showAddForm = true;
     this.showDetails = false;
     this.selectedCour = null;
-  }
-
-  ajouterCours(): void {
-    this.coursService.ajouterCours(this.mesCours).subscribe(
-      (data) => {
-        this.cours.push(data);
-        console.log('Cours ajoutée avec succès', data);
-      },
-      (error) => {
-        console.error("Erreur lors de l'ajout du cours", error);
-      }
-    );
-  }
-
-  // Méthode pour supprimer une cours
-  supprimerCours(id: string): void {
-    if (
-      confirm(`Êtes-vous sûr de vouloir supprimer le cours  ?`)
-    ) {
-      this.coursService.supprimerCours(id).subscribe(
-        () => {
-          this.cours = this.cours.filter((cours) => cours.id !== id); 
-          console.log('Cours supprimée avec succès');
-        },
-        (error) => {
-          console.error('Erreur lors de la suppression du cours', error);
-        }
-      );
-    }
-  }
-
-  // Méthode pour consulter les détails d'un cours
-  consulterCours(id: string): void {
-    this.coursService.consulterCours(id).subscribe(
-      (data) => {
-        this.mesCours = data; 
-        console.log('Cours consultée', data);
-      },
-      (error) => {
-        console.error('Erreur lors de la consultation du cours', error);
-      }
-    );
-  }
-
-  // Méthode pour mettre à jour un cours
-  updateCours(): void {
-    this.coursService.updateCours(this.mesCours).subscribe(
-      (data) => {
-        
-        const index = this.cours.findIndex((c) => c.id === data.id);
-        if (index !== -1) {
-          this.cours[index] = data;
-        }
-        console.log('Cours mise à jour avec succès', data);
-      },
-      (error) => {
-        console.error('Erreur lors de la mise à jour du cours', error);
-      }
-    );
+    this.isEditing = false;
+    this.isAddFormOpen = true;
   }
 
   fermerModalAjouterCours() {
     this.showAddForm = false;
   }
 
-  ouvrirModalAjouterCours() {
+  openEditForm(cour: ICours) {
+    if (!cour) return; // Vérifie que le cours est valide
+    
+    // Créer une copie profonde de l'objet cours
+    this.selectedCour = { ...cour };
+
+    // S'assurer que l'année académique est définie
+    if (!this.selectedCour.anneeAcademique || this.selectedCour.anneeAcademique === '') {
+      this.selectedCour.anneeAcademique = this.anneeAcademiques[0];
+    }
+
     this.showAddForm = true;
+    this.showDetails = false;
+    this.isEditing = true;
+    this.isAddFormOpen = true;
+}
+
+
+  closeAddForm() {
+    this.showAddForm = false;
+    this.selectedCour = null;
+    this.isEditing = false;
+    this.isAddFormOpen = false;
+    
+    // Réinitialiser l'objet mesCours avec l'année académique par défaut
+    this.mesCours = {
+      titre: '', 
+      volumeHoraire: 0, 
+      coefficient: 0, 
+      anneeAcademique: this.anneeAcademiques[0],
+      matiereId: '', 
+      professeurId: '', 
+      classeId: ''
+    };
   }
 }

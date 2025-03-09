@@ -1,7 +1,7 @@
 <div class="modal-backdrop" (click)="onClose()">
     <div class="modal-content" (click)="$event.stopPropagation()">
       <div class="modal-header">
-        <h2 class="text-xl font-bold text-gray-800">Ajouter un étudiant</h2>
+        <h2 class="text-xl font-bold text-gray-800">{{isEditing ? "Modifier un étudiant" : "Ajouter un étudiant"}}</h2>
         <button (click)="onClose()" class="modal-close">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -18,7 +18,7 @@
               type="text" 
               id="nom" 
               name="nom" 
-              [(ngModel)]="etudiant.nom" 
+              [(ngModel)]="_etudiant.nom" 
               class="form-input" 
               [ngClass]="{'input-error': formErrors['nom']}"
             >
@@ -32,7 +32,7 @@
               type="text" 
               id="prenom" 
               name="prenom" 
-              [(ngModel)]="etudiant.prenom" 
+              [(ngModel)]="_etudiant.prenom" 
               class="form-input"
               [ngClass]="{'input-error': formErrors['prenom']}"
             >
@@ -46,7 +46,7 @@
               type="email" 
               id="email" 
               name="email" 
-              [(ngModel)]="etudiant.email" 
+              [(ngModel)]="_etudiant.email" 
               class="form-input"
               [ngClass]="{'input-error': formErrors['email']}"
             >
@@ -60,7 +60,7 @@
               type="tel" 
               id="telephone" 
               name="telephone" 
-              [(ngModel)]="etudiant.tel" 
+              [(ngModel)]="_etudiant.tel" 
               class="form-input"
               [ngClass]="{'input-error': formErrors['telephone']}"
             >
@@ -88,7 +88,7 @@
           
           
           <!-- Statut -->
-          <div class="form-group">
+          <!-- <div class="form-group">
             <label for="statut" class="form-label">Statut</label>
             <div class="flex gap-4 mt-2">
               <label class="inline-flex items-center">
@@ -96,7 +96,7 @@
                   type="radio" 
                   name="statut" 
                   [value]="'Actif'" 
-                  [(ngModel)]="etudiant.statut" 
+                  [(ngModel)]="_etudiant.statut" 
                   class="form-radio"
                 >
                 <span class="ml-2">Actif</span>
@@ -106,13 +106,13 @@
                   type="radio" 
                   name="statut" 
                   [value]="'Inactif'" 
-                  [(ngModel)]="etudiant.statut" 
+                  [(ngModel)]="_etudiant.statut" 
                   class="form-radio"
                 >
                 <span class="ml-2">Inactif</span>
               </label>
             </div>
-          </div>
+          </div> -->
         </form>
       </div>
       
@@ -122,7 +122,7 @@
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
           </svg>
-          Enregistrer
+          {{isEditing ? "Modifier" : "Enregistrer"}}
         </button>
       </div>
     </div>

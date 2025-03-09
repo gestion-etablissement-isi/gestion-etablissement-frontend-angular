@@ -1,67 +1,70 @@
 <div class="modal-backdrop" (click)="onClose()">
-    <div class="modal-content" (click)="$event.stopPropagation()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
       <div class="modal-header">
-        <h2 class="text-xl font-bold text-gray-800">Ajouter un étudiant</h2>
-        <button (click)="onClose()" class="modal-close">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
+          <h2 class="text-xl font-bold text-gray-800">{{isEditing ? "Modifier une matiere" : "Ajouter une matiere"}}</h2>
+          <button (click)="onClose()" class="modal-close">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+          </button>
       </div>
-      
+
       <div class="modal-body">
-        <form (ngSubmit)="onSubmit()" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <!-- Libelle -->
-          <div class="form-group">
-            <label for="libelle" class="form-label">Libelle <span class="text-error">*</span></label>
-            <input 
-              type="text" 
-              id="libelle" 
-              name="libelle" 
-              [(ngModel)]="matiere.libelle" 
-              class="form-input" 
-              [ngClass]="{'input-error': formErrors['libelle']}"
-            >
-            <p *ngIf="formErrors['libelle']" class="error-message">{{ formErrors['libelle'] }}</p>
-          </div>
-          
-          <!-- Statut -->
-          <div class="form-group">
-            <label for="statut" class="form-label">Statut</label>
-            <div class="flex gap-4 mt-2">
-              <label class="inline-flex items-center">
-                <input 
-                  type="radio" 
-                  name="statut" 
-                  [value]="'Actif'" 
-                  [(ngModel)]="matiere.statut" 
-                  class="form-radio"
-                >
-                <span class="ml-2">Actif</span>
-              </label>
-              <label class="inline-flex items-center">
-                <input 
-                  type="radio" 
-                  name="statut" 
-                  [value]="'Inactif'" 
-                  [(ngModel)]="matiere.statut" 
-                  class="form-radio"
-                >
-                <span class="ml-2">Inactif</span>
-              </label>
-            </div>
-          </div>
-        </form>
+          <form (ngSubmit)="onSubmit()" #matiereForm="ngForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <!-- Libelle -->
+              <div class="form-group">
+                  <label for="libelle" class="form-label">Libelle <span class="text-error">*</span></label>
+                  <input 
+                      type="text" 
+                      id="libelle" 
+                      name="libelle" 
+                      [(ngModel)]="mat.libelle" 
+                      class="form-input" 
+                      [ngClass]="{'input-error': formErrors['libelle']}"
+                      required
+                  >
+                  <p *ngIf="formErrors['libelle']" class="error-message">{{ formErrors['libelle'] }}</p>
+              </div>
+
+              <!-- Statut -->
+              <div class="form-group">
+                  <label for="statut" class="form-label">Statut</label>
+                  <div class="flex gap-4 mt-2">
+                      <label class="inline-flex items-center">
+                          <input 
+                              type="radio" 
+                              name="statut" 
+                              value="Actif" 
+                              [(ngModel)]="mat.statut"
+                              class="form-radio"
+                              required
+                          >
+                          <span class="ml-2">Actif</span>
+                      </label>
+                      <label class="inline-flex items-center">
+                          <input 
+                              type="radio" 
+                              name="statut" 
+                              value="Inactif" 
+                              [(ngModel)]="mat.statut"
+                              class="form-radio"
+                              required
+                          >
+                          <span class="ml-2">Inactif</span>
+                      </label>
+                  </div>
+              </div>
+
+              <div class="modal-footer">
+                  <button type="button" class="btn-secondary" (click)="onClose()">Annuler</button>
+                  <button type="submit" class="btn-primary">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                      </svg>
+                      {{isEditing ? "Modifier" : "Enregistrer"}}
+                  </button>
+              </div>
+          </form>
       </div>
-      
-      <div class="modal-footer">
-        <button type="button" class="btn-secondary" (click)="onClose()">Annuler</button>
-        <button type="button" class="btn-primary" (click)="onSubmit()">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-          </svg>
-          Enregistrer
-        </button>
-      </div>
-    </div>
   </div>
+</div>

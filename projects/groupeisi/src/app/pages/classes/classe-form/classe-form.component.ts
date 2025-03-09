@@ -1,31 +1,32 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ClasseService } from '../../../services/classe.service';
 import { IClasse } from '../../../interfaces/classe.interface';
 
 @Component({
-    selector: 'app-classe-form',
-    imports: [CommonModule, FormsModule],
-    templateUrl: './classe-form.component.html',
-    styleUrls: ['./classe-form.component.css']
+  selector: 'app-classe-form',
+  standalone: true,
+  imports: [CommonModule, FormsModule],
+  templateUrl: './classe-form.component.html',
+  styleUrls: ['./classe-form.component.css'],
 })
 export class ClasseFormComponent {
   @Input() anneesScolaires: string[] = [];
   @Input() isEditing: boolean = false;
-  @Input() set classe(value: any) {
+  @Input() set classe(value: IClasse | null) {
     if (value) {
-      this._classe = { ...value };
+      this._classe = { ...value }; // Copie profonde de l'objet
+    } else {
+      this._classe = { nom: '', annee_scolaire: '', capacite: 0}; // Initialisation par défaut
     }
   }
   @Output() close = new EventEmitter<void>();
-  @Output() save = new EventEmitter<any>();
+  @Output() save = new EventEmitter<IClasse>();
 
   _classe: IClasse = {
     nom: '',
-    anneeScolaire: '',
+    annee_scolaire: '',
     capacite: 0,
-    effectif: 0,
   };
 
   formErrors: { [key: string]: string } = {};
@@ -43,29 +44,26 @@ export class ClasseFormComponent {
       isValid = false;
     }
 
-
-    if (!this._classe.anneeScolaire) {
-      this.formErrors['anneeScolaire'] = 'L\'année scolaire est requise';
+    if (!this._classe.annee_scolaire) {
+      this.formErrors['anneeScolaire'] = "L'année scolaire est requise";
       isValid = false;
     }
-
 
     if (this._classe.capacite < 1) {
       this.formErrors['capacite'] = 'La capacité doit être supérieure à 0';
       isValid = false;
     }
 
-    if (this._classe.effectif! < 1) {
-      this.formErrors['effectif'] = 'L\'effectif doit être supérieure à 0';
-      isValid = false;
-    }
 
     return isValid;
   }
 
   onSubmit() {
     if (this.validateForm()) {
+      console.log('Données du formulaire :', this._classe);
       this.save.emit(this._classe);
+      this.close.emit();
+      // window.location.reload(); // Recharge toute la page
     }
   }
 }

@@ -17,6 +17,11 @@ export class ClasseDetailsComponent {
   }
 
   getOccupationPercentage(): number {
-    return Math.round((this.classe?.effectif || 0 / this.classe!.capacite) * 100);
+    if (!this.classe || this.classe.capacite === undefined || this.classe.effectif === undefined) {
+      return 0;  // ou une autre valeur par défaut
+    }
+  
+    return Math.round((this.classe.effectif * 100) / this.classe.capacite );
   }
+  
 }

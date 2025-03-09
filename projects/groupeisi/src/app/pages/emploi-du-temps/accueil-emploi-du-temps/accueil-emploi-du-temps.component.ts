@@ -3,60 +3,71 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CreneauDetailsComponent } from '../creneau-details/creneau-details.component';
 import { AjouterCreneauComponent } from '../ajouter-creneau/ajouter-creneau.component';
-
-interface Cours {
-  id: number;
-  titre: string;
-  professeur: string;
-  classe: string;
-  matiere: string;
-  volumeHoraire: number;
-  coefficient: number;
-  anneeAcademique: string;
-  statut: string;
-}
-
-interface Creneau {
-  id: number;
-  cours: Cours;
-  descriptions: CreneauDescription[];
-  couleur: string;
-}
-
-interface CreneauDescription {
-  date: string;
-  salle: string;
-  description: string;
-  heureDebut: string;
-  heureFin: string;
-}
+import { ICours } from '../../../interfaces/cours.interface';
+import { ICreneau } from '../../../interfaces/creneau.interface';
+import { IDescription } from '../../../interfaces/description.interface';
+import { IClasse } from '../../../interfaces/classe.interface';
+import { IProfesseur } from '../../../interfaces/professeur.interface';
+import { IMatiere } from '../../../interfaces/matiere.interface';
+import { MatiereService } from '../../../services/matiere/matiere.service';
+import { ProfesseurService } from '../../../services/professeur/professeur.service';
+import { ClasseService } from '../../../services/classe/classe.service';
+import { CoursService } from '../../../services/cours/cours.service';
+import { DescriptionService } from '../../../services/description/description.service';
+import { CreneauService } from '../../../services/creneau/creneau.service';
+import { forkJoin, Observable, of } from 'rxjs';
+import { finalize, map, tap } from 'rxjs/operators';
 
 interface JourCalendrier {
   date: Date;
-  creneau: Creneau[];
+  creneau: ICreneau[];
   estJourActuel: boolean;
   estMoisActuel: boolean;
 }
+
 @Component({
-    selector: 'app-accueil-emploi-du-temps',
-    imports: [CommonModule, FormsModule, CreneauDetailsComponent, AjouterCreneauComponent],
-    templateUrl: './accueil-emploi-du-temps.component.html',
-    styleUrl: './accueil-emploi-du-temps.component.css'
+  selector: 'app-accueil-emploi-du-temps',
+  imports: [
+    CommonModule,
+    FormsModule,
+    CreneauDetailsComponent,
+    AjouterCreneauComponent,
+  ],
+  templateUrl: './accueil-emploi-du-temps.component.html',
+  styleUrl: './accueil-emploi-du-temps.component.css',
 })
-export class AccueilEmploiDuTempsComponent implements OnInit  {
+export class AccueilEmploiDuTempsComponent implements OnInit {
   // Données
-  creneau: Creneau[] = [];
+  descriptions: IDescription[] = [];
+  description: IDescription = {
+    id: '',
+    dateCours: new Date(0),
+    heureDebut: '',
+    heureFin: '',
+    description: '',
+  };
+
+  creneaux: ICreneau[] = [];
+  creneau: ICreneau = { id: '', coursId: '', descriptions: [] };
+
   joursDuCalendrier: JourCalendrier[] = [];
+
+  // Mappings pour les références rapides
+  coursMap: { [id: string]: ICours } = {};
+  classeMap: { [id: string]: IClasse } = {};
+  professeurMap: { [id: string]: IProfesseur } = {};
+  matiereMap: { [id: string]: IMatiere } = {};
+
+  // Listes
+  classeList: IClasse[] = [];
+  professeurList: IProfesseur[] = [];
+  matiereList: IMatiere[] = [];
+  coursList: ICours[] = [];
 
   // Filtres
   filtreClasse: string = '';
   filtreProfesseur: string = '';
   filtreMatiere: string = '';
-
-  // Options pour les filtres
-  classes: string[] = ['Terminale S', 'Terminale L', 'Première S', 'Première L', 'Seconde A', 'Seconde B'];
-  professeurs: string[] = ['Martin Dubois', 'Sophie Moreau', 'Philippe Lambert', 'Claire Fontaine', 'Thomas Petit', 'Marie Leroy'];
-  matieres: string[] = ['Mathématiques', 'Physique-Chimie', 'Français', 'Histoire-Géographie', 'SVT', 'Anglais', 'Philosophie'];
 
   // Gestion du calendrier
   dateActuelle: Date = new Date();
@@ -64,285 +75,137 @@ export class AccueilEmploiDuTempsComponent implements OnInit  {
   vueCalendrier: 'jour' | 'semaine' | 'mois' = 'mois';
 
   // Gestion des détails
-  selectedCreneau: Creneau | null = null;
+  selectedCreneau: ICreneau | null = null;
   showDetails: boolean = false;
 
   // Gestion de l'ajout de creneau
   showAjouterCreneau: boolean = false;
 
+  // États de chargement
+  isLoading: boolean = true;
+
   // Jours de la semaine
   joursSemaine: string[] = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
 
+  // Couleurs pour les créneaux - persistent par cours
+  creneauColors: { [coursId: string]: string } = {};
+  colorOptions: string[] = [
+    '#4285F4', '#EA4335', '#FBBC05', '#34A853', // Google colors
+    '#6200EA', '#2962FF', '#00BFA5', '#FF6D00', // Material design
+    '#9C27B0', '#E91E63', '#009688', '#607D8B'  // More material colors
+  ];
+
+  constructor(
+    private matiereService: MatiereService,
+    private professeurService: ProfesseurService,
+    private classeService: ClasseService,
+    private coursService: CoursService,
+    private descriptionService: DescriptionService,
+    private creneauService: CreneauService
+  ) {}
+
   ngOnInit() {
-    this.loadCreneau();
-    this.genererCalendrier();
+    this.isLoading = true;
+    this.loadAllData();
   }
 
-  loadCreneau() {
-    // Données fictives pour la démonstration
-    this.creneau = [
-      {
-        id: 1,
-        cours: {
-          id: 1,
-          titre: 'Mathématiques',
-          professeur: 'Martin Dubois',
-          classe: 'Terminale S',
-          matiere: 'Mathématiques',
-          volumeHoraire: 2, // À ajuster si nécessaire
-          coefficient: 1,   // À ajuster si nécessaire
-          anneeAcademique: '2025-2026',
-          statut: 'Actif',
-        },
-        descriptions: [
-          {
-            date: '2025-06-01',
-            salle: 'A101',
-            description: 'Cours de mathématiques - Chapitre sur les fonctions',
-            heureDebut: '08:00',
-            heureFin: '10:00',
-          }
-        ],
-        couleur: '#4A77B4',
-      },
-      {
-        id: 2,
-        cours: {
-          id: 2,
-          titre: 'Physique-Chimie',
-          professeur: 'Sophie Moreau',
-          classe: 'Terminale S',
-          matiere: 'Physique-Chimie',
-          volumeHoraire: 2, // À ajuster si nécessaire
-          coefficient: 1,   // À ajuster si nécessaire
-          anneeAcademique: '2025-2026',
-          statut: 'Actif',
-        },
-        descriptions: [
-          {
-            date: '2025-06-01',
-            salle: 'B202',
-            description: 'Cours de physique - Travaux pratiques',
-            heureDebut: '10:15',
-            heureFin: '12:15',
-          }
-        ],
-        couleur: '#6C5CE7',
-      },
-      {
-        id: 3,
-        cours: {
-          id: 3,
-          titre: 'Français',
-          professeur: 'Claire Fontaine',
-          classe: 'Première L',
-          matiere: 'Français',
-          volumeHoraire: 2, // À ajuster si nécessaire
-          coefficient: 1,   // À ajuster si nécessaire
-          anneeAcademique: '2025-2026',
-          statut: 'Actif',
-        },
-        descriptions: [
-          {
-            date: '2025-06-02',
-            salle: 'C103',
-            description: 'Étude de texte - Baudelaire',
-            heureDebut: '13:30',
-            heureFin: '15:30',
-          }
-        ],
-        couleur: '#00B894',
-      },
-      {
-        id: 4,
-        cours: {
-          id: 4,
-          titre: 'Histoire-Géographie',
-          professeur: 'Thomas Petit',
-          classe: 'Terminale L',
-          matiere: 'Histoire-Géographie',
-          volumeHoraire: 2, // À ajuster si nécessaire
-          coefficient: 1,   // À ajuster si nécessaire
-          anneeAcademique: '2025-2026',
-          statut: 'Actif',
-        },
-        descriptions: [
-          {
-            date: '2025-06-03',
-            salle: 'D105',
-            description: 'La Seconde Guerre mondiale',
-            heureDebut: '08:00',
-            heureFin: '10:00',
-          }
-        ],
-        couleur: '#FF7675',
-      },
-      {
-        id: 5,
-        cours: {
-          id: 5,
-          titre: 'SVT',
-          professeur: 'Marie Leroy',
-          classe: 'Première S',
-          matiere: 'SVT',
-          volumeHoraire: 2, // À ajuster si nécessaire
-          coefficient: 1,   // À ajuster si nécessaire
-          anneeAcademique: '2025-2026',
-          statut: 'Actif',
-        },
-        descriptions: [
-          {
-            date: '2025-06-04',
-            salle: 'B201',
-            description: 'Génétique et évolution',
-            heureDebut: '10:15',
-            heureFin: '12:15',
-          }
-        ],
-        couleur: '#FDCB6E',
-      },
-      {
-        id: 6,
-        cours: {
-          id: 6,
-          titre: 'Anglais',
-          professeur: 'Philippe Lambert',
-          classe: 'Seconde A',
-          matiere: 'Anglais',
-          volumeHoraire: 2, // À ajuster si nécessaire
-          coefficient: 1,   // À ajuster si nécessaire
-          anneeAcademique: '2025-2026',
-          statut: 'Actif',
-        },
-        descriptions: [
-          {
-            date: '2025-06-05',
-            salle: 'A102',
-            description: 'Expression orale - Débat',
-            heureDebut: '13:30',
-            heureFin: '15:30',
-          }
-        ],
-        couleur: '#E84393',
-      },
-      {
-        id: 7,
-        cours: {
-          id: 7,
-          titre: 'Philosophie',
-          professeur: 'Claire Fontaine',
-          classe: 'Terminale L',
-          matiere: 'Philosophie',
-          volumeHoraire: 2, // À ajuster si nécessaire
-          coefficient: 1,   // À ajuster si nécessaire
-          anneeAcademique: '2025-2026',
-          statut: 'Actif',
-        },
-        descriptions: [
-          {
-            date: '2025-06-06',
-            salle: 'C104',
-            description: 'La conscience et l\'inconscient',
-            heureDebut: '08:00',
-            heureFin: '10:00',
-          }
-        ],
-        couleur: '#00CEC9',
-      },
-      {
-        id: 8,
-        cours: {
-          id: 8,
-          titre: 'Mathématiques',
-          professeur: 'Martin Dubois',
-          classe: 'Première S',
-          matiere: 'Mathématiques',
-          volumeHoraire: 2, // À ajuster si nécessaire
-          coefficient: 1,   // À ajuster si nécessaire
-          anneeAcademique: '2025-2026',
-          statut: 'Actif',
-        },
-        descriptions: [
-          {
-            date: '2025-06-09',
-            salle: 'A101',
-            description: 'Probabilités et statistiques',
-            heureDebut: '10:15',
-            heureFin: '12:15',
-          }
-        ],
-        couleur: '#4A77B4',
-      },
-      {
-        id: 9,
-        cours: {
-          id: 9,
-          titre: 'Physique-Chimie',
-          professeur: 'Sophie Moreau',
-          classe: 'Terminale S',
-          matiere: 'Physique-Chimie',
-          volumeHoraire: 2, // À ajuster si nécessaire
-          coefficient: 1,   // À ajuster si nécessaire
-          anneeAcademique: '2025-2026',
-          statut: 'Actif',
-        },
-        descriptions: [
-          {
-            date: '2025-06-10',
-            salle: 'B202',
-            description: 'Électromagnétisme',
-            heureDebut: '13:30',
-            heureFin: '15:30',
-          }
-        ],
-        couleur: '#6C5CE7',
-      },
-      {
-        id: 10,
-        cours: {
-          id: 10,
-          titre: 'Français',
-          professeur: 'Claire Fontaine',
-          classe: 'Première L',
-          matiere: 'Français',
-          volumeHoraire: 2, // À ajuster si nécessaire
-          coefficient: 1,   // À ajuster si nécessaire
-          anneeAcademique: '2025-2026',
-          statut: 'Actif',
-        },
-        descriptions: [
-          {
-            date: '2025-06-11',
-            salle: 'C103',
-            description: 'Dissertation',
-            heureDebut: '08:00',
-            heureFin: '10:00',
-          }
-        ],
-        couleur: '#00B894',
-      },
-      // Continuer pour le reste des créneaux...
-    ];
-    
+  loadAllData() {
+    // Charger toutes les données nécessaires avant de générer le calendrier
+    forkJoin({
+      cours: this.coursService.getAllCours(),
+      classes: this.classeService.getAllClasses(),
+      professeurs: this.professeurService.getAllProfesseurs(),
+      matieres: this.matiereService.getAllMatieres(),
+      creneaux: this.creneauService.getAllCreneaux()
+    }).pipe(
+      tap(results => {
+        // Stocker les résultats dans les listes
+        this.coursList = results.cours;
+        this.classeList = results.classes;
+        this.professeurList = results.professeurs;
+        this.matiereList = results.matieres;
+        this.creneaux = results.creneaux;
 
-    // Mettre à jour les dates pour qu'elles soient relatives au mois actuel
-    const aujourdhui = new Date();
-    this.creneau = this.creneau.map(creneau => {
-      creneau.descriptions = creneau.descriptions.map(description => {
-        const dateOrigine = new Date(description.date);
-        const nouvelleDate = new Date(
-          aujourdhui.getFullYear(),
-          aujourdhui.getMonth(),
-          dateOrigine.getDate()
-        );
-        return {
-          ...description,
-          date: nouvelleDate.toISOString().split('T')[0], // format AAAA-MM-JJ
-        };
-      });
+        // Créer des maps pour un accès rapide
+        this.coursList.forEach(cours => {
+          this.coursMap[cours.id!] = cours;
+          // Assigner une couleur aléatoire à chaque cours
+          if (!this.creneauColors[cours.id!]) {
+            this.creneauColors[cours.id!] = this.getRandomColor();
+          }
+        });
+        this.classeList.forEach(classe => this.classeMap[classe.id!] = classe);
+        this.professeurList.forEach(prof => this.professeurMap[prof.id!] = prof);
+        this.matiereList.forEach(mat => this.matiereMap[mat.id!] = mat);
+
+        console.log('Données chargées:', {
+          cours: this.coursList.length,
+          classes: this.classeList.length,
+          professeurs: this.professeurList.length,
+          matieres: this.matiereList.length,
+          creneaux: this.creneaux.length
+        });
+      }),
+      finalize(() => {
+        this.isLoading = false;
+        this.genererCalendrier();
+      })
+    ).subscribe(
+      () => {},
+      (error) => {
+        console.error('Erreur lors du chargement des données', error);
+        this.isLoading = false;
+      }
+    );
+  }
+
+  getRandomColor(): string {
+    return this.colorOptions[Math.floor(Math.random() * this.colorOptions.length)];
+  }
+
+  getColorForCours(coursId: string): string {
+    if (!this.creneauColors[coursId]) {
+      this.creneauColors[coursId] = this.getRandomColor();
+    }
+    return this.creneauColors[coursId];
+  }
+
+  // Méthodes synchrones pour accéder aux données mappées
+  getNomClasse(coursId: string): string {
+    const cours = this.coursMap[coursId];
+    if (!cours) return 'Cours introuvable';
     
-      return creneau;
-    });
+    const classe = this.classeMap[cours.classeId];
+    return classe ? classe.nom : 'Classe introuvable';
+  }
+
+  getNomCours(coursId: string): string {
+    const cours = this.coursMap[coursId];
+    return cours ? cours.titre : 'Cours introuvable';
+  }
+
+  getMatiereCours(coursId: string): string {
+    const cours = this.coursMap[coursId];
+    if (!cours) return 'Matière introuvable';
+    
+    const matiere = this.matiereMap[cours.matiereId];
+    return matiere ? matiere.libelle : 'Matière introuvable';
+  }
+
+  getProfesseurCours(coursId: string): string {
+    const cours = this.coursMap[coursId];
+    if (!cours) return 'Professeur introuvable';
+    
+    const prof = this.professeurMap[cours.professeurId];
+    return prof ? `${prof.prenom} ${prof.nom}` : 'Professeur introuvable';
+  }
+
+  getClasseCours(coursId: string): string {
+    return this.getNomClasse(coursId);
+  }
+
+  getCours(coursId: string): ICours | null {
+    return this.coursMap[coursId] || null;
   }
 
   genererCalendrier() {
@@ -376,9 +239,9 @@ export class AccueilEmploiDuTempsComponent implements OnInit  {
       const date = new Date(annee, mois - 1, dernierJourMoisPrecedent - i);
       this.joursDuCalendrier.push({
         date,
-        creneau: this.getCreneauForDate(date),
+        creneau: this.getCreneauxFiltres(date),
         estJourActuel: this.estJourActuel(date),
-        estMoisActuel: false
+        estMoisActuel: false,
       });
     }
 
@@ -387,9 +250,9 @@ export class AccueilEmploiDuTempsComponent implements OnInit  {
       const date = new Date(annee, mois, jour);
       this.joursDuCalendrier.push({
         date,
-        creneau: this.getCreneauForDate(date),
+        creneau: this.getCreneauxFiltres(date),
         estJourActuel: this.estJourActuel(date),
-        estMoisActuel: true
+        estMoisActuel: true,
       });
     }
 
@@ -399,9 +262,9 @@ export class AccueilEmploiDuTempsComponent implements OnInit  {
       const date = new Date(annee, mois + 1, jour);
       this.joursDuCalendrier.push({
         date,
-        creneau: this.getCreneauForDate(date),
+        creneau: this.getCreneauxFiltres(date),
         estJourActuel: this.estJourActuel(date),
-        estMoisActuel: false
+        estMoisActuel: false,
       });
     }
   }
@@ -419,9 +282,9 @@ export class AccueilEmploiDuTempsComponent implements OnInit  {
 
       this.joursDuCalendrier.push({
         date: jourCourant,
-        creneau: this.getCreneauForDate(jourCourant),
+        creneau: this.getCreneauxFiltres(jourCourant),
         estJourActuel: this.estJourActuel(jourCourant),
-        estMoisActuel: jourCourant.getMonth() === this.moisActuel.getMonth()
+        estMoisActuel: jourCourant.getMonth() === this.moisActuel.getMonth(),
       });
     }
   }
@@ -431,42 +294,85 @@ export class AccueilEmploiDuTempsComponent implements OnInit  {
 
     this.joursDuCalendrier.push({
       date,
-      creneau: this.getCreneauForDate(date),
+      creneau: this.getCreneauxFiltres(date),
       estJourActuel: this.estJourActuel(date),
-      estMoisActuel: true
+      estMoisActuel: true,
     });
   }
 
-  getCreneauForDate(date: Date): Creneau[] {
+  getCreneauxFiltres(date: Date): ICreneau[] {
     const dateStr = date.toISOString().split('T')[0];
-    
-    // Filtrer les créneaux qui ont au moins une description pour cette date
-    const creneauxFiltered = this.creneau.filter(creneau => {
-      // Vérifier si au moins une description correspond à la date
-      const dateMatch = creneau.descriptions.some(desc => desc.date === dateStr);
-      
-      // Appliquer les filtres utilisateur
-      const classeMatch = !this.filtreClasse || creneau.cours.classe === this.filtreClasse;
-      const professeurMatch = !this.filtreProfesseur || creneau.cours.professeur === this.filtreProfesseur;
-      const matiereMatch = !this.filtreMatiere || creneau.cours.matiere === this.filtreMatiere;
-      
-      return dateMatch && classeMatch && professeurMatch && matiereMatch;
+
+    // Filtrer les créneaux par date
+    const creneauxDuJour = this.creneaux.filter(creneau => {
+      return creneau.descriptions.some(desc => {
+        // Comparer les dates sans les heures
+        const descDate = new Date(desc.dateCours);
+        return (
+          descDate.getFullYear() === date.getFullYear() &&
+          descDate.getMonth() === date.getMonth() &&
+          descDate.getDate() === date.getDate()
+        );
+      });
     });
-    
-    // Pour chaque créneau, créer une copie avec uniquement les descriptions de la date
-    return creneauxFiltered.map(creneau => {
-      return {
-        ...creneau,
-        descriptions: creneau.descriptions.filter(desc => desc.date === dateStr)
-      };
-    });
+
+    // Appliquer les filtres utilisateur
+    return creneauxDuJour
+      .filter(creneau => {
+        // Si aucun filtre n'est appliqué, retourner tous les créneaux
+        if (!this.filtreClasse && !this.filtreProfesseur && !this.filtreMatiere) {
+          return true;
+        }
+
+        const cours = this.coursMap[creneau.coursId];
+        if (!cours) return false;
+
+        // Appliquer les filtres
+        let passeFiltre = true;
+
+        // Filtre par classe
+        if (this.filtreClasse && passeFiltre) {
+          const classe = this.classeMap[cours.classeId];
+          passeFiltre = classe && classe.nom === this.filtreClasse;
+        }
+
+        // Filtre par professeur
+        if (this.filtreProfesseur && passeFiltre) {
+          const prof = this.professeurMap[cours.professeurId];
+          passeFiltre = prof && `${prof.prenom} ${prof.nom}` === this.filtreProfesseur;
+        }
+
+        // Filtre par matière
+        if (this.filtreMatiere && passeFiltre) {
+          const matiere = this.matiereMap[cours.matiereId];
+          passeFiltre = matiere && matiere.libelle === this.filtreMatiere;
+        }
+
+        return passeFiltre;
+      })
+      // Pour chaque créneau, ne garder que les descriptions pour cette date
+      .map(creneau => {
+        return {
+          ...creneau,
+          descriptions: creneau.descriptions.filter(desc => {
+            const descDate = new Date(desc.dateCours);
+            return (
+              descDate.getFullYear() === date.getFullYear() &&
+              descDate.getMonth() === date.getMonth() &&
+              descDate.getDate() === date.getDate()
+            );
+          })
+        };
+      });
   }
 
   estJourActuel(date: Date): boolean {
-    const aujourdhui = new Date();
-    return date.getDate() === aujourdhui.getDate() &&
-           date.getMonth() === aujourdhui.getMonth() &&
-           date.getFullYear() === aujourdhui.getFullYear();
+    const aujourdhui = this.dateActuelle;
+    return (
+      date.getDate() === aujourdhui.getDate() &&
+      date.getMonth() === aujourdhui.getMonth() &&
+      date.getFullYear() === aujourdhui.getFullYear()
+    );
   }
 
   changerMois(increment: number) {
@@ -484,7 +390,8 @@ export class AccueilEmploiDuTempsComponent implements OnInit  {
     this.genererCalendrier();
   }
 
-  showCreneauDetails(creneau: Creneau) {
+  showCreneauDetails(creneau: ICreneau) {
+    console.log('Créneau sélectionné :', creneau);
     this.selectedCreneau = creneau;
     this.showDetails = true;
   }
@@ -505,10 +412,6 @@ export class AccueilEmploiDuTempsComponent implements OnInit  {
     this.genererCalendrier();
   }
 
-  formatHoraire(heureDebut: string, heureFin: string): string {
-    return `${heureDebut} - ${heureFin}`;
-  }
-
   formatMonth(date: Date): string {
     return date.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
   }
@@ -518,7 +421,11 @@ export class AccueilEmploiDuTempsComponent implements OnInit  {
   }
 
   formatFullDate(date: Date): string {
-    return date.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+    return date.toLocaleDateString('fr-FR', {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+    });
   }
 
   // Méthodes pour l'ajout de creneau
@@ -530,20 +437,16 @@ export class AccueilEmploiDuTempsComponent implements OnInit  {
     this.showAjouterCreneau = false;
   }
 
-  ajouterCreneau(nouveauCreneau: Creneau) {
-    this.creneau.push(nouveauCreneau);
-    this.genererCalendrier();
-  }
-
-  getDescriptionsForDate(creneau: Creneau, dateString: string): CreneauDescription[] {
-    return creneau.descriptions.filter(desc => desc.date === dateString);
-  }
-
-  getBackgroundColor(couleur: string): string {
-    return `${couleur}20`; // 20 représente une opacité de 12.5%
-  }
-
-  hasMultipleDescriptions(creneau: Creneau): boolean {
-    return creneau.descriptions.length > 1;
+  ajouterCreneau(nouveauCreneau: ICreneau) {
+    this.creneauService.ajouterCreneau(nouveauCreneau).subscribe(
+      (creneau) => {
+        this.creneaux.push(creneau);
+        this.genererCalendrier();
+        this.fermerModalAjouterCreneau();
+      },
+      (error) => {
+        console.error('Erreur lors de l\'ajout du créneau', error);
+      }
+    );
   }
 }
