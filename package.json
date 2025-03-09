@@ -8,6 +8,7 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "test:e2e": "node run-all-tests.js",
+    "sonar": "sonar-scanner",
     "serve:ssr:groupeisi": "node dist/groupeisi/server/server.mjs"
   },
   "private": true,

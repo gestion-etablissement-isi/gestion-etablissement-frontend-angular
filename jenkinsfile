@@ -1,0 +1,276 @@
+pipeline {
+    agent any
+    
+    environment {
+        // Configuration des variables d'environnement
+        DOCKER_REGISTRY_LOCAL = "localhost:5000"
+        DOCKER_REGISTRY_PUBLIC = "docker.io/julesbest176"
+        APP_NAME = "gestion-etablissement-frontend"
+        VERSION = "${BUILD_NUMBER}"
+        SONARQUBE_URL = "http://sonarqube:9000"
+        K8S_CONFIG = credentials('k8s-config')
+        CLOUD_CREDENTIALS = credentials('cloud-credentials')
+    }
+    
+    stages {
+        // Étape 1: Récupération du code source
+        stage('Checkout') {
+            
+            steps {
+                git 'https://github.com/gestion-etablissement-isi/gestion-etablissement-frontend-angular.git'
+            }
+        }
+        
+        // Étape 2: Installation des dépendances
+        stage('Install Dependencies') {
+            steps {
+                sh 'npm install'
+                echo "Dépendances installées avec succès"
+            }
+        }
+        
+        // Étape 3: Build du projet
+        stage('Build') {
+            steps {
+                sh 'npm run build -- --configuration production'
+                echo "Build réalisé avec succès"
+            }
+        }
+        
+        // Étape 4: Tests unitaires
+        stage('Unit Tests') {
+            steps {
+                sh 'npm test'
+                echo "Tests unitaires exécutés avec succès"
+            }
+        }
+        
+        // Étape 5: Tests IHM pour le frontend
+        stage('E2E Tests') {
+            steps {
+                sh 'npm run test:e2e'
+                echo "Tests E2E exécutés avec succès"
+            }
+        }
+        
+        // Étape 6: Vérification de la qualité logicielle avec SonarQube
+        stage('Code Quality') {
+            steps {
+                withSonarQubeEnv('SonarQube') {
+                    sh 'npm run sonar'
+                }
+                timeout(time: 10, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: true
+                }
+                echo "Analyse de qualité terminée avec succès"
+            }
+        }
+        
+        // Étape 7: Création d'une image Docker
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    // Création de l'image Docker en utilisant le Dockerfile.angular
+                    sh "docker build -f Dockerfile.angular -t ${APP_NAME}:${VERSION} ."
+                    echo "Image Docker créée avec succès"
+                }
+            }
+        }
+        
+        // Étape 8: Publication des artifacts et images selon l'environnement
+        stage('Push Artifacts') {
+            parallel {
+                // Environnement DEV
+                stage('DEV') {
+                    when {
+                        branch 'develop'
+                    }
+                    steps {
+                        script {
+                            // Tag et push vers le registry local
+                            sh "docker tag ${APP_NAME}:${VERSION} ${DOCKER_REGISTRY_LOCAL}/${APP_NAME}:${VERSION}-dev"
+                            sh "docker push ${DOCKER_REGISTRY_LOCAL}/${APP_NAME}:${VERSION}-dev"
+                            
+                            // Archivage de l'artifact
+                            archiveArtifacts artifacts: 'dist/**/*', fingerprint: true
+                            
+                            echo "Artifacts publiés pour l'environnement DEV"
+                        }
+                    }
+                }
+                
+                // Environnement STAGING
+                stage('STAGING') {
+                    when {
+                        branch 'staging'
+                    }
+                    steps {
+                        script {
+                            // Tag et push vers le registry local pour K8s
+                            sh "docker tag ${APP_NAME}:${VERSION} ${DOCKER_REGISTRY_LOCAL}/${APP_NAME}:${VERSION}-staging"
+                            sh "docker push ${DOCKER_REGISTRY_LOCAL}/${APP_NAME}:${VERSION}-staging"
+                            
+                            // Archivage de l'artifact
+                            archiveArtifacts artifacts: 'dist/**/*', fingerprint: true
+                            
+                            echo "Artifacts publiés pour l'environnement STAGING"
+                        }
+                    }
+                }
+                
+                // Environnements PREPROD et PROD
+                stage('PREPROD & PROD') {
+                    when {
+                        branch 'main'
+                    }
+                    steps {
+                        script {
+                            // Tag et push vers le registry public
+                            sh "docker tag ${APP_NAME}:${VERSION} ${DOCKER_REGISTRY_PUBLIC}/${APP_NAME}:${VERSION}"
+                            sh "docker push ${DOCKER_REGISTRY_PUBLIC}/${APP_NAME}:${VERSION}"
+                            
+                            // Tag et push pour preprod et prod
+                            sh "docker tag ${APP_NAME}:${VERSION} ${DOCKER_REGISTRY_PUBLIC}/${APP_NAME}:${VERSION}-preprod"
+                            sh "docker push ${DOCKER_REGISTRY_PUBLIC}/${APP_NAME}:${VERSION}-preprod"
+                            
+                            sh "docker tag ${APP_NAME}:${VERSION} ${DOCKER_REGISTRY_PUBLIC}/${APP_NAME}:latest"
+                            sh "docker push ${DOCKER_REGISTRY_PUBLIC}/${APP_NAME}:latest"
+                            
+                            // Archivage de l'artifact
+                            archiveArtifacts artifacts: 'dist/**/*', fingerprint: true
+                            
+                            echo "Artifacts publiés pour les environnements PREPROD et PROD"
+                        }
+                    }
+                }
+            }
+        }
+        
+        // Étape 9: Provisioning et déploiement des environnements cibles
+        stage('Deploy') {
+            parallel {
+                // Déploiement en DEV (Docker)
+                stage('Deploy to DEV') {
+                    when {
+                        branch 'develop'
+                    }
+                    steps {
+                        script {
+                            // Déploiement avec Docker Compose
+                            sh "docker-compose -f docker-compose.yml down || true"
+                            sh "docker-compose -f docker-compose.yml up -d"
+                            
+                            echo "Application déployée dans l'environnement DEV"
+                        }
+                    }
+                }
+                
+                // Déploiement en STAGING (Kubernetes)
+                stage('Deploy to STAGING') {
+                    when {
+                        branch 'staging'
+                    }
+                    steps {
+                        script {
+                            // Configuration de Kubernetes
+                            sh "mkdir -p ~/.kube"
+                            sh "echo '${K8S_CONFIG}' > ~/.kube/config"
+                            
+                            // Mise à jour du déploiement avec Kubectl
+                            sh "sed -i 's|{{IMAGE_NAME}}|${DOCKER_REGISTRY_LOCAL}/${APP_NAME}:${VERSION}-staging|g' kubernetes/staging/deployment.yaml"
+                            sh "kubectl apply -f kubernetes/staging/deployment.yaml"
+                            sh "kubectl apply -f kubernetes/staging/service.yaml"
+                            
+                            echo "Application déployée dans l'environnement STAGING (K8s)"
+                        }
+                    }
+                }
+                
+                // Déploiement en PREPROD (Cloud)
+                stage('Deploy to PREPROD') {
+                    when {
+                        branch 'main'
+                    }
+                    steps {
+                        script {
+                            // Déploiement sur le serveur cloud
+                            withCredentials([sshUserPrivateKey(credentialsId: 'cloud-server-key', keyFileVariable: 'SSH_KEY')]) {
+                                sh """
+                                ssh -i ${SSH_KEY} user@preprod-server.cloud 'docker pull ${DOCKER_REGISTRY_PUBLIC}/${APP_NAME}:${VERSION}-preprod'
+                                ssh -i ${SSH_KEY} user@preprod-server.cloud 'docker stop ${APP_NAME} || true'
+                                ssh -i ${SSH_KEY} user@preprod-server.cloud 'docker rm ${APP_NAME} || true'
+                                ssh -i ${SSH_KEY} user@preprod-server.cloud 'docker run -d -p 80:80 --name ${APP_NAME} ${DOCKER_REGISTRY_PUBLIC}/${APP_NAME}:${VERSION}-preprod'
+                                """
+                            }
+                            
+                            echo "Application déployée dans l'environnement PREPROD (Cloud)"
+                        }
+                    }
+                }
+                
+                // Déploiement en PROD (Cloud avec approbation manuelle)
+                stage('Deploy to PROD') {
+                    when {
+                        branch 'main'
+                    }
+                    steps {
+                        // Approbation manuelle avant déploiement en production
+                        input message: 'Approuver le déploiement en PRODUCTION?', ok: 'Déployer'
+                        
+                        script {
+                            // Déploiement sur le serveur cloud de production
+                            withCredentials([sshUserPrivateKey(credentialsId: 'cloud-server-key', keyFileVariable: 'SSH_KEY')]) {
+                                sh """
+                                ssh -i ${SSH_KEY} user@prod-server.cloud 'docker pull ${DOCKER_REGISTRY_PUBLIC}/${APP_NAME}:latest'
+                                ssh -i ${SSH_KEY} user@prod-server.cloud 'docker stop ${APP_NAME} || true'
+                                ssh -i ${SSH_KEY} user@prod-server.cloud 'docker rm ${APP_NAME} || true'
+                                ssh -i ${SSH_KEY} user@prod-server.cloud 'docker run -d -p 80:80 --name ${APP_NAME} ${DOCKER_REGISTRY_PUBLIC}/${APP_NAME}:latest'
+                                """
+                            }
+                            
+                            echo "Application déployée dans l'environnement PROD (Cloud)"
+                        }
+                    }
+                }
+            }
+        }
+        
+        // Étape 10: Mise en place du monitoring (seulement pour la PROD)
+        stage('Setup Monitoring') {
+            when {
+                branch 'main'
+            }
+            steps {
+                script {
+                    // Déploiement de la stack de monitoring (Prometheus + Grafana)
+                    withCredentials([sshUserPrivateKey(credentialsId: 'cloud-server-key', keyFileVariable: 'SSH_KEY')]) {
+                        sh """
+                        ssh -i ${SSH_KEY} user@prod-server.cloud 'docker-compose -f monitoring/docker-compose.yml up -d'
+                        """
+                    }
+                    
+                    echo "Système de monitoring déployé avec succès"
+                }
+            }
+        }
+    }
+    
+    post {
+        success {
+            echo "Pipeline exécuté avec succès!"
+            
+            // Notification de succès
+            slackSend channel: '#deployments', color: 'good', message: "Déploiement de ${APP_NAME}:${VERSION} réussi!"
+        }
+        failure {
+            echo "Échec du pipeline!"
+            
+            // Notification d'échec
+            slackSend channel: '#deployments', color: 'danger', message: "ÉCHEC du déploiement de ${APP_NAME}:${VERSION}!"
+        }
+        always {
+            // Nettoyage de l'espace de travail
+            cleanWs()
+        }
+    }
+}
