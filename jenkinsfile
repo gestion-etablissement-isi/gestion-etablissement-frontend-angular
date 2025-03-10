@@ -2,30 +2,14 @@ pipeline {
     agent any
     
     environment {
-        NVM_DIR = "${HOME}/.nvm"
-        PATH = "${NVM_DIR}/versions/node/v16.20.0/bin:${PATH}"
+        APP_NAME = 'groupeisi-frontend'
     }
     
     stages {
         stage('Préparation') {
             steps {
-                sh '''
-                    # Installer NVM si non présent
-                    if [ ! -d "$NVM_DIR" ]; then
-                        curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash
-                    fi
-                    
-                    # Charger NVM
-                    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-                    
-                    # Installer Node.js LTS
-                    nvm install --lts
-                    nvm use --lts
-                    
-                    # Vérifier les versions
-                    node --version
-                    npm --version
-                '''
+                sh 'node --version'
+                sh 'npm --version'
             }
         }
         
@@ -38,28 +22,19 @@ pipeline {
         
         stage('Installation des Dépendances') {
             steps {
-                sh '''
-                    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-                    npm ci
-                '''
+                sh 'npm ci'
             }
         }
         
         stage('Build') {
             steps {
-                sh '''
-                    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-                    npm run build -- --configuration production
-                '''
+                sh 'npm run build -- --configuration production'
             }
         }
         
         stage('Tests Unitaires') {
             steps {
-                sh '''
-                    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-                    npm test -- --watch=false --browsers=ChromeHeadless || true
-                '''
+                sh 'npm test -- --watch=false --browsers=ChromeHeadless || true'
             }
         }
     }
