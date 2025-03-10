@@ -49,33 +49,39 @@ pipeline {
                 sh 'npm test -- --watch=false --browsers=ChromeHeadless || true'
             }
         }
-        
-        stage('SonarQube Analysis') {
-            steps {
-                // Installation manuelle de sonar-scanner
-                sh '''
-                apk add --update curl unzip openjdk11
-                
-                # Télécharger et installer SonarScanner
-                mkdir -p /opt/sonar-scanner
-                curl -sSLo /tmp/sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.8.0.2856-linux.zip
-                unzip -o /tmp/sonar-scanner.zip -d /opt/
-                mv /opt/sonar-scanner-* /opt/sonar-scanner-cli
-                ln -sf /opt/sonar-scanner-cli/bin/sonar-scanner /usr/local/bin/sonar-scanner
-                rm /tmp/sonar-scanner.zip
-                '''
-                
-                withCredentials([string(credentialsId: 'SONAR_TOKEN', variable: 'SONAR_TOKEN')]) {
-                    sh '''
-                    sonar-scanner \\
-                        -Dsonar.projectKey=groupeisi-frontend \\
-                        -Dsonar.sources=src \\
-                        -Dsonar.host.url=http://localhost:9000 \\
-                        -Dsonar.login=$SONAR_TOKEN
-                    '''
-                }
-            }
+
+        stage('Sonar Scanner Coverage') {
+            sh "npm run sonar"
         }
+        
+        // stage('SonarQube Analysis') {
+        //     steps {
+        //         // Installation manuelle de sonar-scanner
+        //         sh '''
+        //         apk add --update curl unzip openjdk11
+                
+        //         # Télécharger et installer SonarScanner
+        //         mkdir -p /opt/sonar-scanner
+        //         curl -sSLo /tmp/sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.8.0.2856-linux.zip
+        //         unzip -o /tmp/sonar-scanner.zip -d /opt/
+        //         mv /opt/sonar-scanner-* /opt/sonar-scanner-cli
+        //         ln -sf /opt/sonar-scanner-cli/bin/sonar-scanner /usr/local/bin/sonar-scanner
+        //         rm /tmp/sonar-scanner.zip
+        //         '''
+                
+        //         withCredentials([string(credentialsId: 'SONAR_TOKEN', variable: 'SONAR_TOKEN')]) {
+        //             sh '''
+        //             sonar-scanner \\
+        //                 -Dsonar.projectKey=groupeisi-frontend \\
+        //                 -Dsonar.sources=src \\
+        //                 -Dsonar.host.url=http://localhost:9000 \\
+        //                 -Dsonar.login=$SONAR_TOKEN
+        //             '''
+        //         }
+        //     }
+        // }
+
+
         stage('Construction Image Docker') {
             steps {
                 script {
