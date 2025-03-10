@@ -24,7 +24,7 @@ pipeline {
         // Installation des dépendances
         stage('Installation des Dépendances') {
             steps {
-                sh 'npm clean-install'
+                sh 'npm ci'  // Utilisation de npm ci pour une installation propre et plus rapide
             }
         }
         
