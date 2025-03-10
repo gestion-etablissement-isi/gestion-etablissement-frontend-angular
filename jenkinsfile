@@ -26,7 +26,12 @@ pipeline {
         
         stage('Installation des Dépendances') {
             steps {
-                sh 'npm ci'
+                sh '''
+                npm config set fetch-timeout 120000
+                npm config set fetch-retries 5
+                npm config set retry-delay 10000
+                npm ci
+                '''
             }
         }
         
