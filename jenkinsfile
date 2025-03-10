@@ -17,9 +17,10 @@ pipeline {
         stage('Préparation') {
             steps {
                 sh '''
-                apk add --update nodejs npm
+                apk add --update nodejs npm openjdk11
                 node --version
                 npm --version
+                java -version
                 '''
             }
         }
