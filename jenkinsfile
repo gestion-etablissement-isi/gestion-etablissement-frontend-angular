@@ -3,7 +3,6 @@ pipeline {
     
     environment {
         APP_NAME = 'groupeisi-frontend'
-        SONAR_HOST_URL = 'http://localhost:9000'  // Remplacez par l'URL de votre serveur SonarQube
     }
 
     tools {
