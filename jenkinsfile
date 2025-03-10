@@ -98,103 +98,103 @@ pipeline {
                 '''
             }
         }
-    }
 
-    stage('Déploiement Staging (Kubernetes)') {
-    when {
-        branch 'staging'
-    }
-    steps {
-        withKubeConfig([credentialsId: 'kubeconfig']) {
-            sh '''
-            # Créer les fichiers de configuration Kubernetes
-            mkdir -p k8s/staging
-            
-            # Namespace
-            cat > k8s/staging/namespace.yml << 'EOL'
-            apiVersion: v1
-            kind: Namespace
-            metadata:
-            name: groupeisi-staging
-            EOL
-                        
-            # Deployment
-            cat > k8s/staging/deployment.yml << 'EOL'
-            apiVersion: apps/v1
-            kind: Deployment
-            metadata:
-            name: angular-frontend
-            namespace: groupeisi-staging
-            spec:
-            replicas: 2
-            selector:
-                matchLabels:
-                app: angular-frontend
-            template:
-                metadata:
-                labels:
-                    app: angular-frontend
-                spec:
-                containers:
-                - name: angular-frontend
-                    image: julesbet176/groupeisi-frontend:latest
+        stage('Déploiement Staging (Kubernetes)') {
+            when {
+                branch 'staging'
+            }
+            steps {
+                withKubeConfig([credentialsId: 'kubeconfig']) {
+                    sh '''
+                    # Créer les fichiers de configuration Kubernetes
+                    mkdir -p k8s/staging
+                    
+                    # Namespace
+                    cat > k8s/staging/namespace.yml << 'EOL'
+                    apiVersion: v1
+                    kind: Namespace
+                    metadata:
+                    name: groupeisi-staging
+                    EOL
+                                
+                    # Deployment
+                    cat > k8s/staging/deployment.yml << 'EOL'
+                    apiVersion: apps/v1
+                    kind: Deployment
+                    metadata:
+                    name: angular-frontend
+                    namespace: groupeisi-staging
+                    spec:
+                    replicas: 2
+                    selector:
+                        matchLabels:
+                        app: angular-frontend
+                    template:
+                        metadata:
+                        labels:
+                            app: angular-frontend
+                        spec:
+                        containers:
+                        - name: angular-frontend
+                            image: julesbet176/groupeisi-frontend:latest
+                            ports:
+                            - containerPort: 80
+                    EOL
+                                
+                    # Service
+                    cat > k8s/staging/service.yml << 'EOL'
+                    apiVersion: v1
+                    kind: Service
+                    metadata:
+                    name: angular-frontend
+                    namespace: groupeisi-staging
+                    spec:
+                    selector:
+                        app: angular-frontend
                     ports:
-                    - containerPort: 80
-            EOL
-                        
-            # Service
-            cat > k8s/staging/service.yml << 'EOL'
-            apiVersion: v1
-            kind: Service
-            metadata:
-            name: angular-frontend
-            namespace: groupeisi-staging
-            spec:
-            selector:
-                app: angular-frontend
-            ports:
-            - port: 80
-                targetPort: 80
-            type: ClusterIP
-            EOL
-                        
-            # Ingress
-            cat > k8s/staging/ingress.yml << 'EOL'
-            apiVersion: networking.k8s.io/v1
-            kind: Ingress
-            metadata:
-            name: angular-frontend
-            namespace: groupeisi-staging
-            annotations:
-                nginx.ingress.kubernetes.io/rewrite-target: /
-            spec:
-            ingressClassName: nginx
-            rules:
-            - host: staging.groupeisi.local
-                http:
-                paths:
-                - path: /
-                    pathType: Prefix
-                    backend:
-                    service:
-                        name: angular-frontend
-                        port:
-                        number: 80
-            EOL
-                        
-            # Appliquer les configurations
-            kubectl apply -f k8s/staging/namespace.yml
-            kubectl apply -f k8s/staging/deployment.yml
-            kubectl apply -f k8s/staging/service.yml
-            kubectl apply -f k8s/staging/ingress.yml
-                        
-            # Vérifier le déploiement
-            kubectl rollout status deployment/angular-frontend -n groupeisi-staging
-            '''
+                    - port: 80
+                        targetPort: 80
+                    type: ClusterIP
+                    EOL
+                                
+                    # Ingress
+                    cat > k8s/staging/ingress.yml << 'EOL'
+                    apiVersion: networking.k8s.io/v1
+                    kind: Ingress
+                    metadata:
+                    name: angular-frontend
+                    namespace: groupeisi-staging
+                    annotations:
+                        nginx.ingress.kubernetes.io/rewrite-target: /
+                    spec:
+                    ingressClassName: nginx
+                    rules:
+                    - host: staging.groupeisi.local
+                        http:
+                        paths:
+                        - path: /
+                            pathType: Prefix
+                            backend:
+                            service:
+                                name: angular-frontend
+                                port:
+                                number: 80
+                    EOL
+                                
+                    # Appliquer les configurations
+                    kubectl apply -f k8s/staging/namespace.yml
+                    kubectl apply -f k8s/staging/deployment.yml
+                    kubectl apply -f k8s/staging/service.yml
+                    kubectl apply -f k8s/staging/ingress.yml
+                                
+                    # Vérifier le déploiement
+                    kubectl rollout status deployment/angular-frontend -n groupeisi-staging
+                    '''
+                }
+            }
         }
-    }
-}
-    
+    }    
+        
     post {
         always {
             cleanWs()
