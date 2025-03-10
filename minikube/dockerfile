@@ -1,6 +1,6 @@
 FROM ubuntu:20.04
 
-# Install dependencies
+# Installer les dépendances nécessaires
 RUN apt-get update && apt-get install -y \
     apt-transport-https \
     ca-certificates \
@@ -8,16 +8,19 @@ RUN apt-get update && apt-get install -y \
     gnupg2 \
     lsb-release \
     sudo \
-    virtualbox \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Minikube
-RUN curl -Lo minikube https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64 \
-    && chmod +x minikube \
-    && mv minikube /usr/local/bin/
+# Installer Minikube (version spécifique pour éviter les problèmes futurs)
+ENV MINIKUBE_VERSION=v1.30.1
+RUN curl -Lo /usr/local/bin/minikube https://storage.googleapis.com/minikube/releases/${MINIKUBE_VERSION}/minikube-linux-amd64 \
+    && chmod +x /usr/local/bin/minikube
 
-# Set Minikube environment variables
+# Utiliser le driver Docker pour éviter VirtualBox
 ENV MINIKUBE_HOME=/root
+ENV KUBECONFIG=/root/.kube/config
 
-# Entry point for Minikube
+# Exposer les ports nécessaires
+EXPOSE 8443 2379 2380 10250 10251 10252 30000-32767
+
+# Définir le point d'entrée
 ENTRYPOINT ["minikube"]

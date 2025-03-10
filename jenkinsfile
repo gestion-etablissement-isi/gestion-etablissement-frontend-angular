@@ -51,6 +51,14 @@ pipeline {
             }
         }
 
+        stage('Test HMI') {
+            steps{
+                sh '''
+
+                '''
+            }
+        }
+
          stage('Construction Image Docker') {
             steps {
                 script {
