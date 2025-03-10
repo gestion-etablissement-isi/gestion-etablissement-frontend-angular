@@ -4,6 +4,10 @@ pipeline {
     environment {
         APP_NAME = 'groupeisi-frontend'
     }
+
+    tools {
+        nodejs 'NodeJS' // Nom de l'installation de Node.js configurée dans Jenkins
+    }
     
     stages {
         stage('Préparation') {
