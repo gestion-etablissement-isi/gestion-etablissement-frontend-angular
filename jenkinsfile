@@ -50,6 +50,28 @@ pipeline {
                 sh 'npm test -- --watch=false --browsers=ChromeHeadless || true'
             }
         }
+        stage('SonarQube Analysis') {
+          steps {
+              dir('frontend') {  // Assure-toi que 'frontend' est bien le dossier du projet Angular
+                  withSonarQubeEnv(installationName: 'sq1') {
+                      script {
+                          sh '''
+                          # Installer les dépendances Angular (si nécessaire)
+                          npm install
+                          
+                          # Scanner le projet Angular avec SonarScanner
+                          sonar-scanner \
+                              -Dsonar.projectKey=mon-projet-angular \
+                              -Dsonar.sources=src \
+                              -Dsonar.host.url=http://localhost:9000 \
+                              -Dsonar.login=mon_token_sonar
+                          '''
+                      }
+                  }
+              }
+          }
+      }
+
 
          stage('Construction Image Docker') {
             steps {
