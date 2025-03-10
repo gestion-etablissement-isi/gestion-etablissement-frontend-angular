@@ -1,0 +1,10 @@
+global:
+  scrape_interval: 15s
+scrape_configs:
+  - job_name: 'frontend'
+    metrics_path: /metrics
+    static_configs:
+      - targets: ['frontend-service:80']
+  - job_name: 'node'
+    static_configs:
+      - targets: ['node-exporter:9100']

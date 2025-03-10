@@ -1,15 +1,13 @@
-version: '3.8'
-
 services:
   # Service pour Keycloak
   keycloak:
     image: keycloak/keycloak:26.1.3
     container_name: keycloak
     ports:
-      - "8080:8080"
+      - "8180:8080"
     environment:
-      KEYCLOAK_ADMIN: admin
-      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
       KC_HOSTNAME: localhost
       KC_HEALTH_ENABLED: true
       KC_METRICS_ENABLED: true
@@ -17,23 +15,20 @@ services:
     networks:
       - my-network
 
-  # Service pour votre application Angular (en mode développement)
+  # Service pour Angular
   angular-app:
     container_name: angular-app
     build:
-      context: .  # Chemin vers le dossier de votre projet Angular
-      dockerfile: Dockerfile.angular  # Nom du Dockerfile pour Angular
+      context: .
+      dockerfile: Dockerfile.angular
     ports:
-      - "4200:4200"
-    volumes:
-      - ./:/app  # Monte le code source dans le conteneur
-      - /app/node_modules  # Évite d'écraser les node_modules du conteneur
+      - "4200:80"
     depends_on:
       - keycloak
     networks:
       - my-network
 
-# Réseau pour connecter les services
+# Configuration du réseau
 networks:
   my-network:
     driver: bridge

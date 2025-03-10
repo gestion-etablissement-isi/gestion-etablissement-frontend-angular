@@ -1,0 +1,23 @@
+FROM ubuntu:20.04
+
+# Install dependencies
+RUN apt-get update && apt-get install -y \
+    apt-transport-https \
+    ca-certificates \
+    curl \
+    gnupg2 \
+    lsb-release \
+    sudo \
+    virtualbox \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Minikube
+RUN curl -Lo minikube https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64 \
+    && chmod +x minikube \
+    && mv minikube /usr/local/bin/
+
+# Set Minikube environment variables
+ENV MINIKUBE_HOME=/root
+
+# Entry point for Minikube
+ENTRYPOINT ["minikube"]

@@ -13,7 +13,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "outputPath": "dist/groupeisi",
+            "outputPath": "dist",
             "index": "projects/groupeisi/src/index.html",
             "browser": "projects/groupeisi/src/main.ts",
             "polyfills": [
@@ -31,10 +31,8 @@
             ],
             "scripts": [],
             "server": "projects/groupeisi/src/main.server.ts",
-            "prerender": true,
-            "ssr": {
-              "entry": "projects/groupeisi/server.ts"
-            }
+            "prerender": false,
+            "ssr": false
           },
           "configurations": {
             "production": {

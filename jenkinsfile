@@ -1,0 +1,124 @@
+pipeline {
+    agent any
+    
+    environment {
+        DOCKER_USERNAME = 'julesbest176'
+        APP_NAME = 'groupeisi-frontend'
+        GITHUB_REPO = 'gestion-etablissement-isi/gestion-etablissement-frontend-angular'
+        SONAR_HOST_URL = 'http://localhost:9000'
+    }
+    
+    stages {
+        // Récupération du code source
+        stage('Récupération du Code') {
+            steps {
+                checkout scm
+            }
+        }
+        
+        // Installation des dépendances
+        stage('Installation des Dépendances') {
+            steps {
+                sh 'npm install'
+            }
+        }
+        
+        // Build du projet
+        stage('Build') {
+            steps {
+                sh 'npm run build -- --configuration production'
+            }
+        }
+        
+        // Tests unitaires
+        stage('Tests Unitaires') {
+            steps {
+                sh 'npm test -- --watch=false --browsers=ChromeHeadless'
+            }
+        }
+        
+        // Tests IHM
+        stage('Tests IHM') {
+            steps {
+                sh 'npm run e2e -- --configuration=ci'
+            }
+        }
+        
+        // Analyse de la qualité du code
+        stage('Qualité du Code') {
+            steps {
+                sh '''
+                npm install -g sonarqube-scanner
+                sonar-scanner \
+                  -Dsonar.projectKey=groupeisi-frontend \
+                  -Dsonar.sources=src \
+                  -Dsonar.host.url=${SONAR_HOST_URL} \
+                  -Dsonar.login=admin \
+                  -Dsonar.password=admin
+                '''
+            }
+        }
+        
+        // Construction de l'image Docker
+        stage('Construction Image Docker') {
+            steps {
+                sh 'docker build -t ${DOCKER_USERNAME}/${APP_NAME}:${BUILD_NUMBER} -f Dockerfile.angular .'
+                sh 'docker tag ${DOCKER_USERNAME}/${APP_NAME}:${BUILD_NUMBER} ${DOCKER_USERNAME}/${APP_NAME}:latest'
+            }
+        }
+        
+        // Push de l'image vers Docker Hub
+        stage('Push Docker Image') {
+            steps {
+                withCredentials([string(credentialsId: 'docker-hub-password', variable: 'DOCKER_PASSWORD')]) {
+                    sh 'echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USERNAME} --password-stdin'
+                    sh 'docker push ${DOCKER_USERNAME}/${APP_NAME}:${BUILD_NUMBER}'
+                    sh 'docker push ${DOCKER_USERNAME}/${APP_NAME}:latest'
+                }
+            }
+        }
+        
+        // Déploiement selon l'environnement
+        stage('Déploiement') {
+            parallel {
+                stage('Dev - Docker') {
+                    when { branch 'develop' }
+                    steps {
+                        sh 'docker-compose -f docker-compose.dev.yml up -d'
+                    }
+                }
+                
+                stage('Staging - Kubernetes') {
+                    when { branch 'staging' }
+                    steps {
+                        sh 'kubectl apply -f k8s/staging/'
+                    }
+                }
+                
+                stage('Production - Cloud') {
+                    when { branch 'main' }
+                    steps {
+                        // Utilisation de scp pour déployer sur le serveur cloud
+                        sh '''
+                        scp -r -i ~/.ssh/id_rsa_cloud docker-compose.prod.yml ubuntu@your-cloud-server:~/
+                        ssh -i ~/.ssh/id_rsa_cloud ubuntu@your-cloud-server "cd ~/ && docker-compose -f docker-compose.prod.yml up -d"
+                        '''
+                    }
+                }
+            }
+        }
+    }
+    
+    post {
+        always {
+            // Nettoyage des anciennes images Docker pour économiser de l'espace
+            sh 'docker system prune -f'
+        }
+        success {
+            echo 'Pipeline exécutée avec succès!'
+        }
+        failure {
+            echo 'Échec de la pipeline!'
+        }
+    }
+}

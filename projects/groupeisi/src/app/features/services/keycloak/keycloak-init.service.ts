@@ -14,6 +14,7 @@ export class KeycloakInitService {
 
   init(): Promise<boolean> {
     if (isPlatformBrowser(this.platformId)) {
+      console.log('Keycloak init started...');
       return this.keycloak.init({
         config: {
           url: environment.keycloak.url,
@@ -21,12 +22,19 @@ export class KeycloakInitService {
           clientId: environment.keycloak.clientId
         },
         initOptions: {
-          onLoad: 'check-sso',
+          onLoad: 'login-required',  // Remplace 'check-sso' par 'login-required' pour forcer la connexion
           silentCheckSsoRedirectUri: window.location.origin + '/assets/silent-check-sso.html'
         }
+      }).then(authenticated => {
+        console.log('Keycloak authenticated:', authenticated);
+        return authenticated;
+      }).catch(error => {
+        console.error('Keycloak init failed:', error);
+        return false;
       });
     } else {
       return Promise.resolve(false);
     }
   }
+  
 }

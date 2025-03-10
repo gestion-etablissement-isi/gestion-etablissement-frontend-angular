@@ -1,14 +1,30 @@
-# Étape 1: Utiliser une image Node.js pour construire l'application
-FROM node:18 as build
+# Étape de build pour Angular
+FROM docker.io/library/node:18 AS build
 WORKDIR /app
-COPY package.json package-lock.json ./
+
+# Copier les fichiers de dépendances
+COPY package*.json ./
+
+# Installer les dépendances
 RUN npm install
+
+# Copier tous les fichiers du projet
 COPY . .
+
+# Builder l'application en mode production
 RUN npm run build -- --configuration production
 
-# Étape 2: Utiliser une image Nginx pour servir l'application
-FROM nginx:alpine
-COPY --from=build /app/dist/groupeisi /usr/share/nginx/html
+# Étape finale avec Nginx
+FROM docker.io/library/nginx:alpine
+
+# Copier la configuration Nginx personnalisée
 COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+# Copier les fichiers buildés depuis l'étape de build
+COPY --from=build /app/dist/browser /usr/share/nginx/html
+
+# Exposer le port 80
 EXPOSE 80
+
+# Commande par défaut de Nginx
 CMD ["nginx", "-g", "daemon off;"]

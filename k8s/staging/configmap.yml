@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: angular-frontend-config
+  namespace: groupeisi-staging
+data:
+  API_URL: "https://api-staging.groupeisi.com"
+  KEYCLOAK_URL: "https://keycloak-staging.groupeisi.com/auth"
+  KEYCLOAK_REALM: "groupeisi"
+  KEYCLOAK_CLIENT_ID: "angular-frontend"

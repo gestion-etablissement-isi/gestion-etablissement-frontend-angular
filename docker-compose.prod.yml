@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  # Service pour l'application Angular (environnement de production)
+  angular-app:
+    image: julesbet176/groupeisi-frontend:latest
+    container_name: angular-app-prod
+    ports:
+      - "80:80"
+    restart: always
+    networks:
+      - groupeisi-network-prod
+
+  # Prometheus pour la collecte des métriques
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus-prod
+    ports:
+      - "9090:9090"
+    volumes:
+      - /opt/monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    restart: always
+    networks:
+      - groupeisi-network-prod
+
+  # Grafana pour la visualisation des métriques
+  grafana:
+    image: grafana/grafana
+    container_name: grafana-prod
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin_secure_password
+    volumes:
+      - /opt/monitoring/grafana/provisioning:/etc/grafana/provisioning
+      - grafana_data:/var/lib/grafana
+    restart: always
+    depends_on:
+      - prometheus
+    networks:
+      - groupeisi-network-prod
+
+  # Node exporter pour les métriques système
+  node-exporter:
+    image: prom/node-exporter
+    container_name: node-exporter
+    restart: always
+    ports:
+      - "9100:9100"
+    networks:
+      - groupeisi-network-prod
+
+volumes:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  groupeisi-network-prod:
+    driver: bridge
