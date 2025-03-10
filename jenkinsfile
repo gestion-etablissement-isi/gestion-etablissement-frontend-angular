@@ -2,14 +2,30 @@ pipeline {
     agent any
     
     environment {
-        APP_NAME = 'groupeisi-frontend'
+        NVM_DIR = "${HOME}/.nvm"
+        PATH = "${NVM_DIR}/versions/node/v16.20.0/bin:${PATH}"
     }
     
     stages {
         stage('Préparation') {
             steps {
-                sh 'node --version'
-                sh 'npm --version'
+                sh '''
+                    # Installer NVM si non présent
+                    if [ ! -d "$NVM_DIR" ]; then
+                        curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash
+                    fi
+                    
+                    # Charger NVM
+                    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+                    
+                    # Installer Node.js LTS
+                    nvm install --lts
+                    nvm use --lts
+                    
+                    # Vérifier les versions
+                    node --version
+                    npm --version
+                '''
             }
         }
         
@@ -22,19 +38,28 @@ pipeline {
         
         stage('Installation des Dépendances') {
             steps {
-                sh 'npm ci'
+                sh '''
+                    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+                    npm ci
+                '''
             }
         }
         
         stage('Build') {
             steps {
-                sh 'npm run build -- --configuration production'
+                sh '''
+                    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+                    npm run build -- --configuration production
+                '''
             }
         }
         
         stage('Tests Unitaires') {
             steps {
-                sh 'npm test -- --watch=false --browsers=ChromeHeadless || true'
+                sh '''
+                    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+                    npm test -- --watch=false --browsers=ChromeHeadless || true
+                '''
             }
         }
     }
