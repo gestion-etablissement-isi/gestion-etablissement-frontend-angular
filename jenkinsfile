@@ -50,30 +50,22 @@ pipeline {
                 sh 'npm test -- --watch=false --browsers=ChromeHeadless || true'
             }
         }
+
         stage('SonarQube Analysis') {
-          steps {
-              dir('frontend') {  // Assure-toi que 'frontend' est bien le dossier du projet Angular
-                  withSonarQubeEnv(installationName: 'sq1') {
-                      script {
-                          sh '''
-                          # Installer les dépendances Angular (si nécessaire)
-                          npm install
-                          
-                          # Scanner le projet Angular avec SonarScanner
-                          sonar-scanner \
-                              -Dsonar.projectKey=mon-projet-angular \
-                              -Dsonar.sources=src \
-                              -Dsonar.host.url=http://localhost:9000 \
-                              -Dsonar.login=mon_token_sonar
-                          '''
-                      }
-                  }
-              }
-          }
-      }
+            steps {
+                withCredentials([string(credentialsId: 'SONAR_TOKEN', variable: 'SONAR_TOKEN')]) {
+                    sh '''
+                    sonar-scanner \
+                        -Dsonar.projectKey=groupeisi-frontend \
+                        -Dsonar.sources=src \
+                        -Dsonar.host.url=http://localhost:9000 \
+                        -Dsonar.login=$SONAR_TOKEN
+                    '''
+                }
+            }
+        }
 
-
-         stage('Construction Image Docker') {
+        stage('Construction Image Docker') {
             steps {
                 script {
                     sh '''
@@ -102,25 +94,21 @@ pipeline {
             }
             steps {
                 sh '''
-                # Créer ou mettre à jour le fichier docker-compose.dev.yml
                 cat > docker-compose.dev.yml << 'EOL'
                 version: '3.8'
-
                 services:
-                angular-app:
+                  angular-app:
                     image: julesbest176/groupeisi-frontend:latest
                     container_name: angular-app-dev
                     ports:
-                    - "4200:80"
+                      - "4200:80"
                     networks:
-                    - groupeisi-network
-
+                      - groupeisi-network
                 networks:
-                groupeisi-network:
+                  groupeisi-network:
                     driver: bridge
                 EOL
 
-                # Déployer avec docker-compose
                 docker-compose -f docker-compose.dev.yml up -d --force-recreate
                 '''
             }
@@ -133,88 +121,81 @@ pipeline {
             steps {
                 withKubeConfig([credentialsId: 'kubeconfig']) {
                     sh '''
-                    # Créer les fichiers de configuration Kubernetes
                     mkdir -p k8s/staging
                     
-                    # Namespace
                     cat > k8s/staging/namespace.yml << 'EOL'
                     apiVersion: v1
                     kind: Namespace
                     metadata:
-                    name: groupeisi-staging
+                      name: groupeisi-staging
                     EOL
-                                
-                    # Deployment
+                    
                     cat > k8s/staging/deployment.yml << 'EOL'
                     apiVersion: apps/v1
                     kind: Deployment
                     metadata:
-                    name: angular-frontend
-                    namespace: groupeisi-staging
+                      name: angular-frontend
+                      namespace: groupeisi-staging
                     spec:
-                    replicas: 2
-                    selector:
+                      replicas: 2
+                      selector:
                         matchLabels:
-                        app: angular-frontend
-                    template:
+                          app: angular-frontend
+                      template:
                         metadata:
-                        labels:
+                          labels:
                             app: angular-frontend
                         spec:
-                        containers:
-                        - name: angular-frontend
-                            image: julesbet176/groupeisi-frontend:latest
-                            ports:
-                            - containerPort: 80
+                          containers:
+                            - name: angular-frontend
+                              image: julesbest176/groupeisi-frontend:latest
+                              ports:
+                                - containerPort: 80
                     EOL
-                                
-                    # Service
+                    
                     cat > k8s/staging/service.yml << 'EOL'
                     apiVersion: v1
                     kind: Service
                     metadata:
-                    name: angular-frontend
-                    namespace: groupeisi-staging
+                      name: angular-frontend
+                      namespace: groupeisi-staging
                     spec:
-                    selector:
+                      selector:
                         app: angular-frontend
-                    ports:
-                    - port: 80
-                        targetPort: 80
-                    type: ClusterIP
+                      ports:
+                        - port: 80
+                          targetPort: 80
+                      type: ClusterIP
                     EOL
-                                
-                    # Ingress
+                    
                     cat > k8s/staging/ingress.yml << 'EOL'
                     apiVersion: networking.k8s.io/v1
                     kind: Ingress
                     metadata:
-                    name: angular-frontend
-                    namespace: groupeisi-staging
-                    annotations:
+                      name: angular-frontend
+                      namespace: groupeisi-staging
+                      annotations:
                         nginx.ingress.kubernetes.io/rewrite-target: /
                     spec:
-                    ingressClassName: nginx
-                    rules:
-                    - host: staging.groupeisi.local
-                        http:
-                        paths:
-                        - path: /
-                            pathType: Prefix
-                            backend:
-                            service:
-                                name: angular-frontend
-                                port:
-                                number: 80
+                      ingressClassName: nginx
+                      rules:
+                        - host: staging.groupeisi.local
+                          http:
+                            paths:
+                              - path: /
+                                pathType: Prefix
+                                backend:
+                                  service:
+                                    name: angular-frontend
+                                    port:
+                                      number: 80
                     EOL
-                                
-                    # Appliquer les configurations
+                    
                     kubectl apply -f k8s/staging/namespace.yml
                     kubectl apply -f k8s/staging/deployment.yml
                     kubectl apply -f k8s/staging/service.yml
                     kubectl apply -f k8s/staging/ingress.yml
-                                
-                    # Vérifier le déploiement
+                    
                     kubectl rollout status deployment/angular-frontend -n groupeisi-staging
                     '''
                 }
@@ -227,10 +208,10 @@ pipeline {
             cleanWs()
         }
         success {
-            echo 'Pipeline exécutée avec succès!'
+            echo 'Pipeline exécutée avec succès! 🎉'
         }
         failure {
-            echo 'Échec de la pipeline!'
+            echo 'Échec de la pipeline! ❌'
         }
     }
 }
