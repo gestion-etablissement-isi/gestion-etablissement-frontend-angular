@@ -3,6 +3,7 @@ pipeline {
     
     environment {
         APP_NAME = 'groupeisi-frontend'
+        SONAR_HOST_URL = 'http://localhost:9000'  // Remplacez par l'URL de votre serveur SonarQube
     }
 
     tools {
@@ -43,6 +44,23 @@ pipeline {
         stage('Tests Unitaires') {
             steps {
                 sh 'npm test -- --watch=false --browsers=ChromeHeadless || true'
+            }
+        }
+
+        // Ajout de l'étape SonarQube
+        stage('Analyse SonarQube') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'sonar-credentials', passwordVariable: 'SONAR_PASSWORD', usernameVariable: 'SONAR_LOGIN')]) {
+                    sh '''
+                    npm install -g sonarqube-scanner
+                    sonar-scanner \
+                      -Dsonar.projectKey=groupeisi-frontend \
+                      -Dsonar.sources=src \
+                      -Dsonar.host.url=${SONAR_HOST_URL} \
+                      -Dsonar.login=${SONAR_LOGIN} \
+                      -Dsonar.password=${SONAR_PASSWORD}
+                    '''
+                }
             }
         }
     }
