@@ -50,16 +50,16 @@ pipeline {
                 sh 'npm test -- --watch=false --browsers=ChromeHeadless || true'
             }
         }
-
+        
         stage('SonarQube Analysis') {
             steps {
-                withCredentials([string(credentialsId: 'SONAR_TOKEN', variable: 'SONAR_TOKEN')]) {
+                withSonarQubeEnv('sq1') {
                     sh '''
                     sonar-scanner \
-                        -Dsonar.projectKey=groupeisi-frontend \
+                        -Dsonar.projectKey=mon-projet-angular \
                         -Dsonar.sources=src \
                         -Dsonar.host.url=http://localhost:9000 \
-                        -Dsonar.login=$SONAR_TOKEN
+                        -Dsonar.login=mon_token_sonar
                     '''
                 }
             }
@@ -80,123 +80,9 @@ pipeline {
             steps {
                 withCredentials([string(credentialsId: 'docker-hub-password', variable: 'DOCKER_PASSWORD')]) {
                     sh '''
-                    echo ${DOCKER_PASSWORD} | docker login -u julesbest176 --password-stdin
+                    echo "${DOCKER_PASSWORD}" | docker login -u julesbest176 --password-stdin
                     docker push julesbest176/${APP_NAME}:${BUILD_NUMBER}
                     docker push julesbest176/${APP_NAME}:latest
-                    '''
-                }
-            }
-        }
-
-        stage('Déploiement Dev (Docker)') {
-            when {
-                branch 'develop'
-            }
-            steps {
-                sh '''
-                cat > docker-compose.dev.yml << 'EOL'
-                version: '3.8'
-                services:
-                  angular-app:
-                    image: julesbest176/groupeisi-frontend:latest
-                    container_name: angular-app-dev
-                    ports:
-                      - "4200:80"
-                    networks:
-                      - groupeisi-network
-                networks:
-                  groupeisi-network:
-                    driver: bridge
-                EOL
-
-                docker-compose -f docker-compose.dev.yml up -d --force-recreate
-                '''
-            }
-        }
-
-        stage('Déploiement Staging (Kubernetes)') {
-            when {
-                branch 'staging'
-            }
-            steps {
-                withKubeConfig([credentialsId: 'kubeconfig']) {
-                    sh '''
-                    mkdir -p k8s/staging
-                    
-                    cat > k8s/staging/namespace.yml << 'EOL'
-                    apiVersion: v1
-                    kind: Namespace
-                    metadata:
-                      name: groupeisi-staging
-                    EOL
-                    
-                    cat > k8s/staging/deployment.yml << 'EOL'
-                    apiVersion: apps/v1
-                    kind: Deployment
-                    metadata:
-                      name: angular-frontend
-                      namespace: groupeisi-staging
-                    spec:
-                      replicas: 2
-                      selector:
-                        matchLabels:
-                          app: angular-frontend
-                      template:
-                        metadata:
-                          labels:
-                            app: angular-frontend
-                        spec:
-                          containers:
-                            - name: angular-frontend
-                              image: julesbest176/groupeisi-frontend:latest
-                              ports:
-                                - containerPort: 80
-                    EOL
-                    
-                    cat > k8s/staging/service.yml << 'EOL'
-                    apiVersion: v1
-                    kind: Service
-                    metadata:
-                      name: angular-frontend
-                      namespace: groupeisi-staging
-                    spec:
-                      selector:
-                        app: angular-frontend
-                      ports:
-                        - port: 80
-                          targetPort: 80
-                      type: ClusterIP
-                    EOL
-                    
-                    cat > k8s/staging/ingress.yml << 'EOL'
-                    apiVersion: networking.k8s.io/v1
-                    kind: Ingress
-                    metadata:
-                      name: angular-frontend
-                      namespace: groupeisi-staging
-                      annotations:
-                        nginx.ingress.kubernetes.io/rewrite-target: /
-                    spec:
-                      ingressClassName: nginx
-                      rules:
-                        - host: staging.groupeisi.local
-                          http:
-                            paths:
-                              - path: /
-                                pathType: Prefix
-                                backend:
-                                  service:
-                                    name: angular-frontend
-                                    port:
-                                      number: 80
-                    EOL
-                    
-                    kubectl apply -f k8s/staging/namespace.yml
-                    kubectl apply -f k8s/staging/deployment.yml
-                    kubectl apply -f k8s/staging/service.yml
-                    kubectl apply -f k8s/staging/ingress.yml
-                    
-                    kubectl rollout status deployment/angular-frontend -n groupeisi-staging
                     '''
                 }
             }
@@ -208,10 +94,10 @@ pipeline {
             cleanWs()
         }
         success {
-            echo 'Pipeline exécutée avec succès! 🎉'
+            echo 'Pipeline exécutée avec succès!'
         }
         failure {
-            echo 'Échec de la pipeline! ❌'
+            echo 'Échec de la pipeline!'
         }
     }
 }
