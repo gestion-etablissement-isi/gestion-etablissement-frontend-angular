@@ -12,7 +12,7 @@ pipeline {
         APP_NAME = 'gestion-etablissement-frontend'
         NODE_VERSION = '18.x'
         SONAR_PROJECT_KEY = 'gestion-etablissement-frontend'
-		SONAR_SCANNER_HOME = tool 'SonarQubeScanner '
+		SONAR_SCANNER_HOME = tool 'SonarQubeScanner'
     }
     
     stages {
