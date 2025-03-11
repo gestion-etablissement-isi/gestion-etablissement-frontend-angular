@@ -34,21 +34,21 @@ pipeline {
             }
         }
         
-        stage('Installation des Dépendances') {
-            steps {
-                sh '''
-                npm config set fetch-timeout 6000000
-                npm config set fetch-retries 5
-                npm ci
-                '''
-            }
-        }
+        // stage('Installation des Dépendances') {
+        //     steps {
+        //         sh '''
+        //         npm config set fetch-timeout 6000000
+        //         npm config set fetch-retries 5
+        //         npm ci
+        //         '''
+        //     }
+        // }
         
-        stage('Build') {
-            steps {
-                sh 'npm run build -- --configuration production'
-            }
-        }
+        // stage('Build') {
+        //     steps {
+        //         sh 'npm run build -- --configuration production'
+        //     }
+        // }
         // stage('Tests Unitaires') {
         //     steps {
         //         sh 'npm test -- --watch=false --browsers=ChromeHeadless || true'
@@ -61,30 +61,21 @@ pipeline {
         //     }
         // }
 
-        stage('SonarQube Analysis') {
+        stage('SonarQube') {
             steps {
-                
-                sh '''
-                apk add --update curl unzip openjdk11
-                
-                # Télécharger et installer SonarScanner
-                mkdir -p /opt/sonar-scanner
-                curl -sSLo /tmp/sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.8.0.2856-linux.zip
-                unzip -o /tmp/sonar-scanner.zip -d /opt/
-                mv /opt/sonar-scanner-* /opt/sonar-scanner-cli
-                ln -sf /opt/sonar-scanner-cli/bin/sonar-scanner /usr/local/bin/sonar-scanner
-                rm /tmp/sonar-scanner.zip
-                '''
-                
-                withCredentials([string(credentialsId: 'SONAR_TOKEN', variable: 'SONAR_TOKEN')]) {
-                    sh '''
-                    sonar-scanner \\
-                        -Dsonar.projectKey=groupeisi-frontend \\
-                        -Dsonar.sources=src \\
-                        -Dsonar.host.url=http://localhost:9000 \\
-                        -Dsonar.login=$SONAR_TOKEN
-                    '''
+
+                withCredentials([string(credentialsId: 'angular-token', variable: 'SONAR_TOKEN')]) {
+                    withSonarQubeEnv('SonarQube') {
+                        sh """
+                            ${SONAR_SCANNER_HOME}/bin/sonar-scanner \
+                            -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
+                            -Dsonar.sources=. \
+                            -Dsonar.host.url=http://host.docker.internal:9000 \
+                            -Dsonar.login=${SONAR_TOKEN} \
+                        """
+                    }
                 }
+                
             }
         }
 
