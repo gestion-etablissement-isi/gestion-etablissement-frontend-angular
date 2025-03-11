@@ -15,16 +15,16 @@ spec:
     spec:
       containers:
       - name: gestion-etablissement-frontend
-        image: julesbest176/groupeisi-frontend:latest
+        image: julesbest176/gestion-etablissement-frontend:latest
         ports:
         - containerPort: 80
         resources:
           limits:
             cpu: "500m"
-            memory: "512Mi"
+            memory: "200Mi"
           requests:
             cpu: "200m"
-            memory: "256Mi"
+            memory: "200Mi"
         livenessProbe:
           httpGet:
             path: /
