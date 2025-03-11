@@ -49,23 +49,19 @@ pipeline {
                 sh 'npm run build -- --configuration production'
             }
         }
-        // stage('Tests Unitaires') {
-        //     steps {
-        //         sh 'npm test -- --watch=false --browsers=ChromeHeadless || true'
-        //     }
-        // }
+        stage('Tests Unitaires') {
+            steps {
+                sh 'npm test -- --watch=false --browsers=ChromeHeadless || true'
+            }
+        }
 
-        // stage('Tests HMI Selenium') {
-        //     steps {
-        //         sh 'npx mocha tests.js || true'
-        //     }
-        // }
+        stage('Tests HMI Selenium') {
+            steps {
+                sh 'npx mocha tests.js || true'
+            }
+        }
 
-        //stage('Sonar Scanner Coverage') {
-        //     steps {
-        //         sh 'npm run sonar'
-        //     }
-        // }
+        
 
         stage('SonarQube Analysis') {
             steps {
