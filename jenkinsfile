@@ -7,7 +7,9 @@ pipeline {
     }
     
     environment {
-        APP_NAME = 'groupeisi-frontend'
+        KUBE_CONFIG = credentials('kube-config')
+        NAMESPACE = 'groupeisi'
+        APP_NAME = 'gestion-etablissement-frontend'
         NODE_VERSION = '18.x'
         SONAR_PROJECT_KEY = 'gestion-etablissement-frontend'
 		SONAR_SCANNER_HOME = tool 'SonarQubeScanner'
@@ -105,6 +107,51 @@ pipeline {
                 }
             }
         }
+
+        stage('Déploiement sur Kubernetes') {
+            steps {
+                script {
+                    echo "Téléchargement et installation de kubectl..."
+                    sh '''
+                    curl -LO "https://dl.k8s.io/release/stable.txt"
+                    KUBECTL_VERSION=$(cat stable.txt)
+                    echo "Version de kubectl : ${KUBECTL_VERSION}"
+                    curl -LO "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl"
+                    chmod +x kubectl
+                    mkdir -p ${WORKSPACE}/bin
+                    mv kubectl ${WORKSPACE}/bin/
+                    echo "kubectl installé avec succès."
+                    '''
+                }
+
+                script {
+                    echo "Vérification de la connexion Kubernetes..."
+                    withKubeConfig([credentialsId: 'kube-config']) {
+                        sh '''
+                        export PATH=${WORKSPACE}/bin:$PATH
+                        kubectl config use-context docker-desktop
+                        kubectl get nodes
+                        '''
+                    }
+                }
+
+                script {
+                    echo "Déploiement sur Kubernetes..."
+                    withKubeConfig([credentialsId: 'kube-config']) {
+                        sh '''
+                        export PATH=${WORKSPACE}/bin:$PATH
+                        kubectl apply -f k8s/deployment.yaml -n ${NAMESPACE}
+                        kubectl apply -f k8s/service.yaml -n ${NAMESPACE}
+                        kubectl set image deployment/${APP_NAME} ${APP_NAME}=julesbest176/${APP_NAME}:${BUILD_NUMBER} -n ${NAMESPACE}
+                        kubectl rollout status deployment/${APP_NAME} -n ${NAMESPACE}
+                        '''
+                    }
+                    echo "Déploiement terminé."
+                }
+            }
+        }
+
+
     }    
         
     post {

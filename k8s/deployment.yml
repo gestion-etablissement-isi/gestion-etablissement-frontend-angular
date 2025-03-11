@@ -1,20 +1,20 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: angular-frontend
-  namespace: groupeisi-staging
+  name: gestion-etablissement-frontend
+  namespace: groupeisi
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: angular-frontend
+      app: gestion-etablissement-frontend
   template:
     metadata:
       labels:
-        app: angular-frontend
+        app: gestion-etablissement-frontend
     spec:
       containers:
-      - name: angular-frontend
+      - name: gestion-etablissement-frontend
         image: julesbest176/groupeisi-frontend:latest
         ports:
         - containerPort: 80
