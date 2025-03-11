@@ -8,7 +8,7 @@ pipeline {
     
     environment {
         KUBE_CONFIG = credentials('kube-config')
-        NAMESPACE = 'groupeisi'
+        NAMESPACE = 'default'
         APP_NAME = 'gestion-etablissement-frontend'
         NODE_VERSION = '18.x'
         SONAR_PROJECT_KEY = 'gestion-etablissement-frontend'
@@ -126,6 +126,8 @@ pipeline {
             mv kubectl ${WORKSPACE}/bin/
             '''
         }
+
+        
         
         script {
             echo "Configuration de Kubernetes..."
