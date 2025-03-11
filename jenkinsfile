@@ -113,6 +113,9 @@ pipeline {
                 script {
                     echo "Téléchargement et installation de kubectl..."
                     sh '''
+                    # Installer curl dans l'image Docker
+                    apk add --no-cache curl
+
                     curl -LO "https://dl.k8s.io/release/stable.txt"
                     KUBECTL_VERSION=$(cat stable.txt)
                     echo "Version de kubectl : ${KUBECTL_VERSION}"
@@ -150,6 +153,7 @@ pipeline {
                 }
             }
         }
+
 
 
     }    
