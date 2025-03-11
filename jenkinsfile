@@ -108,7 +108,7 @@ pipeline {
         //     }
         // }
 
-        stage('Déploiement sur Kubernetes') {
+       stage('Déploiement sur Kubernetes') {
             steps {
                 script {
                     echo "Téléchargement et installation de kubectl..."
@@ -132,8 +132,10 @@ pipeline {
                     withKubeConfig([credentialsId: 'kube-config']) {
                         sh '''
                         export PATH=${WORKSPACE}/bin:$PATH
-                        kubectl config use-context docker-desktop
-                        kubectl get nodes
+                        export KUBECONFIG=/var/jenkins_home/.kube/config
+                        
+                        kubectl cluster-info --insecure-skip-tls-verify=true
+                        kubectl get nodes --insecure-skip-tls-verify=true
                         '''
                     }
                 }
@@ -143,16 +145,19 @@ pipeline {
                     withKubeConfig([credentialsId: 'kube-config']) {
                         sh '''
                         export PATH=${WORKSPACE}/bin:$PATH
-                        kubectl apply -f k8s/deployment.yml -n ${NAMESPACE}
-                        kubectl apply -f k8s/service.yml -n ${NAMESPACE}
-                        kubectl set image deployment/${APP_NAME} ${APP_NAME}=julesbest176/${APP_NAME}:${BUILD_NUMBER} -n ${NAMESPACE}
-                        kubectl rollout status deployment/${APP_NAME} -n ${NAMESPACE}
+                        export KUBECONFIG=/var/jenkins_home/.kube/config
+
+                        kubectl apply -f k8s/deployment.yml -n ${NAMESPACE} --validate=false --insecure-skip-tls-verify=true
+                        kubectl apply -f k8s/service.yml -n ${NAMESPACE} --validate=false --insecure-skip-tls-verify=true
+                        kubectl set image deployment/${APP_NAME} ${APP_NAME}=julesbest176/${APP_NAME}:${BUILD_NUMBER} -n ${NAMESPACE} --insecure-skip-tls-verify=true
+                        kubectl rollout status deployment/${APP_NAME} -n ${NAMESPACE} --insecure-skip-tls-verify=true
                         '''
                     }
-                    echo "Déploiement terminé."
+                    echo "Déploiement terminé avec succès."
                 }
             }
         }
+
 
 
 
