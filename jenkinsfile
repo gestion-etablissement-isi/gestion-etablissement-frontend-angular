@@ -16,16 +16,16 @@ pipeline {
     }
     
     stages {
-        stage('Préparation') {
-            steps {
-                sh '''
-                apk add --update nodejs npm openjdk17
-                node --version
-                npm --version
-                java -version
-                '''
-            }
-        }
+        // stage('Préparation') {
+        //     steps {
+        //         sh '''
+        //         apk add --update nodejs npm openjdk17
+        //         node --version
+        //         npm --version
+        //         java -version
+        //         '''
+        //     }
+        // }
         
         stage('Récupération du Code') {
             steps {
