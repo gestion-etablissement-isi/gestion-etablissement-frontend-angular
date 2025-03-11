@@ -34,21 +34,21 @@ pipeline {
             }
         }
         
-        // stage('Installation des Dépendances') {
-        //     steps {
-        //         sh '''
-        //         npm config set fetch-timeout 6000000
-        //         npm config set fetch-retries 5
-        //         npm ci
-        //         '''
-        //     }
-        // }
+        stage('Installation des Dépendances') {
+            steps {
+                sh '''
+                npm config set fetch-timeout 6000000
+                npm config set fetch-retries 5
+                npm ci
+                '''
+            }
+        }
         
-        // stage('Build') {
-        //     steps {
-        //         sh 'npm run build -- --configuration production'
-        //     }
-        // }
+        stage('Build') {
+            steps {
+                sh 'npm run build -- --configuration production'
+            }
+        }
         // stage('Tests Unitaires') {
         //     steps {
         //         sh 'npm test -- --watch=false --browsers=ChromeHeadless || true'
@@ -63,7 +63,7 @@ pipeline {
 
         stage('SonarQube Analysis') {
             steps {
-                // Installation manuelle de sonar-scanner
+                
                 sh '''
                 apk add --update curl unzip openjdk11
                 
