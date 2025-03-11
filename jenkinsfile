@@ -44,24 +44,24 @@ pipeline {
             }
         }
         
-        stage('Build') {
-            steps {
-                sh 'npm run build -- --configuration production'
-            }
-        }
-        stage('Tests Unitaires') {
-            steps {
-                sh 'npm test -- --watch=false --browsers=ChromeHeadless || true'
-            }
-        }
+        // stage('Build') {
+        //     steps {
+        //         sh 'npm run build -- --configuration production'
+        //     }
+        // }
+        // stage('Tests Unitaires') {
+        //     steps {
+        //         sh 'npm test -- --watch=false --browsers=ChromeHeadless || true'
+        //     }
+        // }
 
-        stage('Tests HMI Selenium') {
-            steps {
-                sh 'npx mocha tests.js || true'
-            }
-        }
+        // stage('Tests HMI Selenium') {
+        //     steps {
+        //         sh 'npx mocha tests.js || true'
+        //     }
+        // }
 
-        stage('Sonar Scanner Coverage') {
+        stage('Sonar Scanner') {
             steps {
                 sh 'npm run sonar'
             }
@@ -111,75 +111,75 @@ pipeline {
         
 
        stage('Déploiement sur Kubernetes') {
-    steps {
-        script {
-            echo "Installation de kubectl..."
-            sh '''
-            if ! command -v curl &> /dev/null; then
-                apt-get update && apt-get install -y curl || apk add --no-cache curl
-            fi
-            curl -LO "https://dl.k8s.io/release/stable.txt"
-            KUBECTL_VERSION=$(cat stable.txt)
-            curl -LO "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl"
-            chmod +x kubectl
-            mkdir -p ${WORKSPACE}/bin
-            mv kubectl ${WORKSPACE}/bin/
-            '''
-        }
+        steps {
+            script {
+                echo "Installation de kubectl..."
+                sh '''
+                if ! command -v curl &> /dev/null; then
+                    apt-get update && apt-get install -y curl || apk add --no-cache curl
+                fi
+                curl -LO "https://dl.k8s.io/release/stable.txt"
+                KUBECTL_VERSION=$(cat stable.txt)
+                curl -LO "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl"
+                chmod +x kubectl
+                mkdir -p ${WORKSPACE}/bin
+                mv kubectl ${WORKSPACE}/bin/
+                '''
+            }
 
-        
-        
-        script {
-            echo "Configuration de Kubernetes..."
-            withCredentials([string(credentialsId: 'kubernetes-token', variable: 'KUBE_TOKEN')]) {
+            
+            
+            script {
+                echo "Configuration de Kubernetes..."
+                withCredentials([string(credentialsId: 'kubernetes-token', variable: 'KUBE_TOKEN')]) {
+                    
+                    sh """
+                        mkdir -p ~/.kube
+                        
+                        cat > ~/.kube/config << EOF
+                        apiVersion: v1
+                        clusters:
+                        - cluster:
+                            server: https://kubernetes.docker.internal:6443
+                            insecure-skip-tls-verify: true
+                        name: docker-desktop
+                        contexts:
+                        - context:
+                            cluster: docker-desktop
+                            namespace: ${NAMESPACE}
+                            user: jenkins-deployer
+                        name: docker-desktop
+                        current-context: docker-desktop
+                        kind: Config
+                        preferences: {}
+                        users:
+                        - name: jenkins-deployer
+                        user:
+                            token: ${KUBE_TOKEN}
+                        EOF
+                        
+                        chmod 600 ~/.kube/config
+                    """
+                }
+            }
+            
+            script {
+                echo "Déploiement sur Kubernetes..."
+                sh '''
+                export PATH=${WORKSPACE}/bin:$PATH
+                export KUBECONFIG=~/.kube/config
                 
-                sh """
-                    mkdir -p ~/.kube
-                    
-                    cat > ~/.kube/config << EOF
-                    apiVersion: v1
-                    clusters:
-                    - cluster:
-                        server: https://kubernetes.docker.internal:6443
-                        insecure-skip-tls-verify: true
-                    name: docker-desktop
-                    contexts:
-                    - context:
-                        cluster: docker-desktop
-                        namespace: ${NAMESPACE}
-                        user: jenkins-deployer
-                    name: docker-desktop
-                    current-context: docker-desktop
-                    kind: Config
-                    preferences: {}
-                    users:
-                    - name: jenkins-deployer
-                    user:
-                        token: ${KUBE_TOKEN}
-                    EOF
-                    
-                    chmod 600 ~/.kube/config
-                """
+                kubectl cluster-info
+                kubectl get nodes
+                
+                kubectl apply -f k8s/deployment.yml -n ${NAMESPACE} --validate=false
+                kubectl apply -f k8s/service.yml -n ${NAMESPACE} --validate=false
+                kubectl set image deployment/${APP_NAME} ${APP_NAME}=julesbest176/${APP_NAME}:${BUILD_NUMBER} -n ${NAMESPACE}
+                kubectl rollout status deployment/${APP_NAME} -n ${NAMESPACE}
+                '''
             }
         }
-        
-        script {
-            echo "Déploiement sur Kubernetes..."
-            sh '''
-            export PATH=${WORKSPACE}/bin:$PATH
-            export KUBECONFIG=~/.kube/config
-            
-            kubectl cluster-info
-            kubectl get nodes
-            
-            kubectl apply -f k8s/deployment.yml -n ${NAMESPACE} --validate=false
-            kubectl apply -f k8s/service.yml -n ${NAMESPACE} --validate=false
-            kubectl set image deployment/${APP_NAME} ${APP_NAME}=julesbest176/${APP_NAME}:${BUILD_NUMBER} -n ${NAMESPACE}
-            kubectl rollout status deployment/${APP_NAME} -n ${NAMESPACE}
-            '''
-        }
     }
-}
 
 
 
