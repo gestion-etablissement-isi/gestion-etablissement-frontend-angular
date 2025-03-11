@@ -108,46 +108,65 @@ pipeline {
         //     }
         // }
 
-        stage('Installation de kubectl') {
-            steps {
-                script {
-                    echo "Téléchargement et installation de kubectl..."
-                    sh '''
-                    curl -LO "https://dl.k8s.io/release/stable.txt"
-                    KUBECTL_VERSION=$(cat stable.txt)
-                    echo "Version de kubectl : ${KUBECTL_VERSION}"
-                    curl -LO "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl"
-                    chmod +x kubectl
-                    mkdir -p ${WORKSPACE}/bin
-                    mv kubectl ${WORKSPACE}/bin/
-                    export PATH=${WORKSPACE}/bin:$PATH
-                    echo "kubectl installé avec succès."
-                    '''
-                }
-            }
-        }
+        
 
        stage('Déploiement sur Kubernetes') {
-            steps {
-                withKubeConfig([credentialsId: 'kube-config', serverUrl: 'https://kubernetes.docker.internal:6443']) {
-                    sh '''
-                    export PATH=${WORKSPACE}/bin:$PATH
-                    
-                    echo "Vérification de la connexion Kubernetes..."
-                    kubectl cluster-info
-                    kubectl get nodes
-                    
-                    echo "Déploiement sur Kubernetes..."
-                    kubectl apply -f k8s/deployment.yml -n ${NAMESPACE}
-                    kubectl apply -f k8s/service.yml -n ${NAMESPACE}
-                    kubectl set image deployment/${APP_NAME} ${APP_NAME}=${DOCKER_REGISTRY}/${APP_NAME}:${BUILD_NUMBER} -n ${NAMESPACE}
-                    kubectl rollout status deployment/${APP_NAME} -n ${NAMESPACE}
-                    '''
-                }
-                echo "Déploiement terminé avec succès."
+    steps {
+        script {
+            echo "Téléchargement et installation de kubectl..."
+            sh '''
+            # Vérifier si curl est disponible, sinon l'installer
+            if ! command -v curl &> /dev/null; then
+                echo "curl not found, installing..."
+                if command -v apt-get &> /dev/null; then
+                    apt-get update && apt-get install -y curl
+                elif command -v apk &> /dev/null; then
+                    apk add --no-cache curl
+                elif command -v yum &> /dev/null; then
+                    yum install -y curl
+                else
+                    echo "Ne peut pas installer curl - package manager non reconnu"
+                    exit 1
+                fi
+            fi
+            
+            curl -LO "https://dl.k8s.io/release/stable.txt"
+            KUBECTL_VERSION=$(cat stable.txt)
+            echo "Version de kubectl : ${KUBECTL_VERSION}"
+            curl -LO "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl"
+            chmod +x kubectl
+            mkdir -p ${WORKSPACE}/bin
+            mv kubectl ${WORKSPACE}/bin/
+            echo "kubectl installé avec succès."
+            '''
+        }
+        script {
+            echo "Vérification de la connexion Kubernetes..."
+            withKubeConfig([credentialsId: 'kube-config', serverUrl: 'https://kubernetes.docker.internal:6443']) {
+                sh '''
+                export PATH=${WORKSPACE}/bin:$PATH
+                # Ne pas définir manuellement KUBECONFIG - le plugin withKubeConfig s'en charge
+                kubectl cluster-info --insecure-skip-tls-verify=true
+                kubectl get nodes --insecure-skip-tls-verify=true
+                '''
             }
         }
-
+        script {
+            echo "Déploiement sur Kubernetes..."
+            withKubeConfig([credentialsId: 'kube-config', serverUrl: 'https://kubernetes.docker.internal:6443']) {
+                sh '''
+                export PATH=${WORKSPACE}/bin:$PATH
+                # Ne pas définir manuellement KUBECONFIG - le plugin withKubeConfig s'en charge
+                kubectl apply -f k8s/deployment.yml -n ${NAMESPACE} --validate=false --insecure-skip-tls-verify=true
+                kubectl apply -f k8s/service.yml -n ${NAMESPACE} --validate=false --insecure-skip-tls-verify=true
+                kubectl set image deployment/${APP_NAME} ${APP_NAME}=julesbest176/${APP_NAME}:${BUILD_NUMBER} -n ${NAMESPACE} --insecure-skip-tls-verify=true
+                kubectl rollout status deployment/${APP_NAME} -n ${NAMESPACE} --insecure-skip-tls-verify=true
+                '''
+            }
+            echo "Déploiement terminé avec succès."
+        }
+    }
+}
 
 
 
